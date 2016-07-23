@@ -95,47 +95,6 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
     private void execDBQuery(v2ProcessCommand pTable) {
         //log.trace("Exec Database query");
 
-
-        /*
-        String host = pTable.get_str("client_url") + "\\" + pTable.get_str("host_name");
-        MSSql sql = new MSSql(host,pTable.get_str("username"),pTable.get_str("password"),pTable.get_str("database_name"));
-
-        ArrayList<String> errors = new ArrayList<>();
-
-        String result = null;
-        try {
-            sql.connect();
-            result = new DBQuery(sql,pTable.get_str("query_string")).result();
-        } catch (SQLException e) {
-            errors.add(e.getMessage());
-
-            //e.printStackTrace();
-        }
-
-        String[] err_list = errors.toArray(new String[errors.size()]);
-        String end_res = "";
-        //If any rows is returned
-
-        //Save log entry
-        if ( ( result != null ) || (err_list.length >= 1) ) {
-
-            //save(pTable, result,err_list);
-
-            //Update status to error
-            this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), "FAIL" );
-
-            //Return SQL was ok
-            end_res = "FAIL";
-        }
-        //If no result and no errors
-        //Update status to ok
-        else {
-            this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), "OK" );
-
-            end_res = "OK";
-        }
-        */
-
         boolean b = new Process_DBQuery(this.returnData,pTable).isOK();
 
         console_output(pTable,Boolean.toString(b));

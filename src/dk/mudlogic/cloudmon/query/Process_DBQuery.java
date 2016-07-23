@@ -1,6 +1,8 @@
 package dk.mudlogic.cloudmon.query;
 
 import com.microsoft.sqlserver.jdbc.SQLServerException;
+import com.sun.javafx.text.ScriptMapper;
+import dk.mudlogic.ScriptManager;
 import dk.mudlogic.cloudmon.client_v2.v2ProcessCommand;
 import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
 import dk.mudlogic.tools.database.MSSql;
@@ -67,6 +69,12 @@ public class Process_DBQuery {
         try {
             result = new DBQuery(sql,pTable.get_str("query_string")).result();
 
+            //Run any parser scripts for the process
+            if (result != null) {
+                //Run script manager with result string
+                result = new ScriptManager(pTable.get_str("parser_script")).parse("toJAVA",result);
+            }
+
             this.status_ok = true;
         } catch (SQLException e) {
             this.status_ok = false;
@@ -83,18 +91,22 @@ public class Process_DBQuery {
 
         //Save log entry
         if ( ( result != null ) || (err_list.length >= 1) ) {
+
             save(pTable, result, err_list);
+
             this.status_ok = false;
 
             //Update status to error
-            this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), "FAIL" );
+            //this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), "FAIL" );
         }
         //If no result and no errors
         //Update status to ok
         else {
             this.status_ok = true;
-            this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), "OK" );
+            //this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), "OK" );
         }
+
+        this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.status_ok) );
     }
 
     private void save(v2ProcessCommand pTable,String result,String[] errors) {

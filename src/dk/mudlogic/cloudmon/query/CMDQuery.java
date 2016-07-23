@@ -10,7 +10,7 @@ import java.util.ArrayList;
 /**
  * Created by soren.pedersen on 06-07-2016.
  */
-public class CMDQuery implements Query_Process {
+public class CMDQuery {
 
     private LogTracer log = new LogFactory().tracer();
 
@@ -23,20 +23,16 @@ public class CMDQuery implements Query_Process {
     public CMDQuery(String pHost,String pOptions) {
         this.pHost = pHost;
         this.pOptions = pOptions;
+
+        start();
     }
 
-    /** Creates a JS array with each line from
-     * return output as rows
-     *
-     * @param list String[]
-     * @return String | JS array
-     */
-    private String toJSON(String[] list) {
-
+    private String jsonString(String[] res) {
         JSONArray a = new JSONArray();
-        for(int i=0; i<list.length; i++) {
-            String s = "\\\"" + list[i] + "\\\"";
-            a.add( s );
+
+        for (int i=0; i<res.length; i++) {
+            String s = res[i];
+            a.add(s);
         }
 
         return a.toJSONString();
@@ -45,25 +41,29 @@ public class CMDQuery implements Query_Process {
     /** Executes the command
      *
      */
-    @Override
     public void start() {
-        String out = "";
-        ArrayList<String> result_list = new ArrayList<>();
-
+        String[] err = new String[1];
+        String end_res;
         try {
-            String[] s = new Execute(this.pHost, this.pOptions).result();
-            result_str = toJSON(s);//out;
+            String[] res = new Execute(this.pHost, this.pOptions).result();
+
+            result_str = jsonString(res);
+
+            end_res = "OK";
         }
         catch(Exception e) {
-            log.error("Command line failed");
+            result_str = null;
+            err[0] = e.getMessage();
+
+            end_res = "FAIL";
+            e.printStackTrace();
         }
     }
 
     /** Returns the command result
      *
-     * @return
+     * @return String
      */
-    @Override
     public String result() {
         String out = result_str;
         result_str = null;
