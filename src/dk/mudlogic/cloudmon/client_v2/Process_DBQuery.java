@@ -1,10 +1,10 @@
-package dk.mudlogic.cloudmon.query;
+package dk.mudlogic.cloudmon.client_v2;
 
-import com.microsoft.sqlserver.jdbc.SQLServerException;
-import com.sun.javafx.text.ScriptMapper;
-import dk.mudlogic.ScriptManager;
-import dk.mudlogic.cloudmon.client_v2.v2ProcessCommand;
+import dk.mudlogic.ServerGlobalData;
+import dk.mudlogic.query.DBQuery;
+import dk.mudlogic.scripts.ScriptManager;
 import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
+import dk.mudlogic.scripts.ScriptResult;
 import dk.mudlogic.tools.database.MSSql;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
@@ -24,23 +24,23 @@ public class Process_DBQuery {
     private DB_ProcessReturnData returnData;
     private ArrayList<String> errors = new ArrayList<>();
 
-    private boolean status_ok;
+    private boolean failed;
     private String result;
 
     public Process_DBQuery(DB_ProcessReturnData prd,v2ProcessCommand pTable) {
-        log.setTracerTitle(Process_DBQuery.class);
+        //log.setTracerTitle(Process_DBQuery.class);
 
         this.returnData = prd;
         this.pTable = pTable;
-        this.status_ok = true;
+        this.failed = false;
 
         connect();
         process();
         finish();
     }
 
-    public boolean isOK() {
-        return status_ok;
+    public boolean hasFailed() {
+        return failed;
     }
 
     public v2ProcessCommand getCommand() {
@@ -49,14 +49,14 @@ public class Process_DBQuery {
 
     private void connect() {
         try {
-            this.status_ok = true;
+            this.failed = false;
 
             String host = pTable.get_str("client_url") + "\\" + pTable.get_str("host_name");
             this.sql = new MSSql(host,pTable.get_str("username"),pTable.get_str("password"),pTable.get_str("database_name"));
 
             sql.connect();
         } catch (SQLException e) {
-            this.status_ok = false;
+            this.failed = true;
 
             errors.add( e.getMessage() );
             //e.printStackTrace();
@@ -71,13 +71,28 @@ public class Process_DBQuery {
 
             //Run any parser scripts for the process
             if (result != null) {
-                //Run script manager with result string
-                result = new ScriptManager(pTable.get_str("parser_script")).parse("toJAVA",result);
+                this.failed = true;
+
+                if (pTable.get_str("parser_script").equals(null)) {
+                    //Run script manager with result string
+
+                    String path = ServerGlobalData.MAIN_CONFIG.group("server").get("install_path")+"parsers\\database\\"+pTable.get_str("parser_script");
+                    ScriptManager sm = new ScriptManager(path);
+                    ScriptResult res = sm.parse(result);
+
+                    if (res.has_error) {
+                        errors.add(res.error_message);
+                    }
+                    else {
+                        result = res.result;
+                    }
+
+                }
+
             }
 
-            this.status_ok = true;
         } catch (SQLException e) {
-            this.status_ok = false;
+            this.failed = true;
 
             errors.add( e.getMessage() );
            // log.error(e.getMessage());
@@ -86,29 +101,29 @@ public class Process_DBQuery {
 
     }
 
+    /** Get result of process and update status and save if needed
+     *
+     */
     private void finish() {
         String[] err_list = errors.toArray(new String[errors.size()]);
 
         //Save log entry
         if ( ( result != null ) || (err_list.length >= 1) ) {
-
             save(pTable, result, err_list);
-
-            this.status_ok = false;
-
-            //Update status to error
-            //this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), "FAIL" );
-        }
-        //If no result and no errors
-        //Update status to ok
-        else {
-            this.status_ok = true;
-            //this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), "OK" );
         }
 
-        this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.status_ok) );
+        console_output(pTable, this.failed );
+
+        //Update status
+        this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed) );
     }
 
+    /** Saves new process data
+     *
+     * @param pTable v2ProcessCommand
+     * @param result String
+     * @param errors String[]
+     */
     private void save(v2ProcessCommand pTable,String result,String[] errors) {
 
         String err_str = jsonArray(errors);
@@ -121,7 +136,6 @@ public class Process_DBQuery {
     }
 
     private String addslashes(String s) {
-        //s = s.replace("\"","\\\"");
         s = s.replace("\'","\"");
 
         return s;
@@ -138,4 +152,16 @@ public class Process_DBQuery {
         return a.toJSONString();
     }
 
+    private void console_output(v2ProcessCommand pTable, boolean status) {
+        String status_str = "[ID:" + pTable.get_str("id")+"]";
+        status_str += "[" + pTable.get_str("client_name")+"]";
+        status_str += "[" + pTable.get_str("group_name")+"]";
+        status_str += "[" + pTable.get_str("process_name")+"]";
+        //status_str += "[Type: " + pTable.get_str("process_type")+"]";
+
+        //String s = status_str + "- Fail: "+status;
+
+        if (status) { log.warning(status_str); }
+        else { log.trace(status_str); }
+    }
 }

@@ -1,10 +1,9 @@
-package dk.mudlogic.cloudmon.query;
+package dk.mudlogic.query;
 
 import dk.mudlogic.tools.database.MSSql;
 import dk.mudlogic.tools.database.SQLResult;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
-import dk.mudlogic.tools.web.parse.ParseJSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 

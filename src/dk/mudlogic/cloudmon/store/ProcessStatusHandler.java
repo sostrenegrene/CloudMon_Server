@@ -41,11 +41,11 @@ public class ProcessStatusHandler {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
 
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            //2e.printStackTrace();
 
             return true;
         }
@@ -53,15 +53,27 @@ public class ProcessStatusHandler {
 
     public void status(int client_id,int command_id,String status) {
         this.command_id = command_id;
+        String query;
 
+        //If status has changed, setup query to update status and add new return data id
         if (has_changed(status)) {
-            String query = "INSERT INTO cloudmon_process_status_changelog (timestamp,client_id,command_id,status) VALUES (GETDATE(),'"+client_id+"','"+command_id+"','"+status+"');" +
-                    "UPDATE cloudmon_process_commands SET status = '"+status+"' WHERE id = '"+command_id+"'";
-            try {
-                sql.query(query);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            query = "UPDATE cloudmon_process_commands SET status = '"+status+"' WHERE id = '"+command_id+"';";
+            query += "INSERT INTO cloudmon_process_status_changelog (timestamp,client_id,command_id,status,start_return_data_id) " +
+                     "VALUES (GETDATE(),'"+client_id+"','"+command_id+"','"+status+"', (SELECT MAX(id) FROM cloudmon_process_return_data WHERE command_id = '"+command_id+"' GROUP BY command_id) );";
+        }
+        //Update the latest return data id to last status change
+        else {
+            query = "UPDATE cloudmon_process_status_changelog " +
+                    "SET end_return_data_id = (SELECT MAX(id) FROM cloudmon_process_return_data WHERE command_id = '"+command_id+"' GROUP BY command_id) " +
+                    "WHERE id = (SELECT MAX(cl.id) FROM cloudmon_process_status_changelog AS cl WHERE cl.command_id = '"+command_id+"')";
+        }
+
+        //Run query
+        try {
+            //log.trace(query);
+            sql.query(query);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
     }

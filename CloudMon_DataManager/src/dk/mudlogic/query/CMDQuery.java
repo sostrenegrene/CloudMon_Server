@@ -1,11 +1,9 @@
-package dk.mudlogic.cloudmon.query;
+package dk.mudlogic.query;
 
 import dk.mudlogic.tools.console.Execute;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
 import org.json.simple.JSONArray;
-
-import java.util.ArrayList;
 
 /**
  * Created by soren.pedersen on 06-07-2016.
@@ -21,6 +19,7 @@ public class CMDQuery {
 
 
     public CMDQuery(String pHost,String pOptions) {
+        log.setTracerTitle(CMDQuery.class);
         this.pHost = pHost;
         this.pOptions = pOptions;
 
@@ -44,20 +43,21 @@ public class CMDQuery {
     public void start() {
         String[] err = new String[1];
         String end_res;
+        String[] res;
         try {
-            String[] res = new Execute(this.pHost, this.pOptions).result();
+            res = new Execute(this.pHost, this.pOptions).result();
 
             result_str = jsonString(res);
-
-            end_res = "OK";
         }
         catch(Exception e) {
             result_str = null;
             err[0] = e.getMessage();
+            res = new String[0];
 
-            end_res = "FAIL";
             e.printStackTrace();
         }
+
+        //log.trace(">>"+res.length+"-"+result_str);
     }
 
     /** Returns the command result
@@ -65,9 +65,7 @@ public class CMDQuery {
      * @return String
      */
     public String result() {
-        String out = result_str;
-        result_str = null;
-        return out;
+        return result_str;
     }
 
 }
