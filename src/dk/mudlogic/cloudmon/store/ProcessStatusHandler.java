@@ -51,12 +51,13 @@ public class ProcessStatusHandler {
         }
     }
 
-    public void status(int client_id,int command_id,String status) {
+    public boolean status(int client_id,int command_id,String status) {
         this.command_id = command_id;
         String query;
 
         //If status has changed, setup query to update status and add new return data id
-        if (has_changed(status)) {
+        boolean changed = has_changed(status);
+        if (changed) {
             query = "UPDATE cloudmon_process_commands SET status = '"+status+"' WHERE id = '"+command_id+"';";
             query += "INSERT INTO cloudmon_process_status_changelog (timestamp,client_id,command_id,status,start_return_data_id) " +
                      "VALUES (GETDATE(),'"+client_id+"','"+command_id+"','"+status+"', (SELECT MAX(id) FROM cloudmon_process_return_data WHERE command_id = '"+command_id+"' GROUP BY command_id) );";
@@ -76,5 +77,6 @@ public class ProcessStatusHandler {
             e.printStackTrace();
         }
 
+        return changed;
     }
 }

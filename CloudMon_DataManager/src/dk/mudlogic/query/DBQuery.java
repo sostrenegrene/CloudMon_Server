@@ -60,6 +60,8 @@ public class DBQuery {
     }
 
     public void start() throws SQLException {
+        //log.warning(query);
+
         res = sql.query(query);
         result = json();
     }

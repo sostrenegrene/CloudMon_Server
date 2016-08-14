@@ -13,6 +13,7 @@ public class ScriptManager {
 
     private LogTracer log = new LogFactory().tracer();
 
+    private String script_path;
     private String script_file;
     private Parser_Javascript jsp;
 
@@ -23,8 +24,10 @@ public class ScriptManager {
      *
      * @param script_file String
      */
-    public ScriptManager(String script_file) {
+    public ScriptManager(String script_path,String script_file) {
         log.setTracerTitle(ScriptManager.class);
+
+        this.script_path = script_path;
         this.script_file = script_file;
 
         start();
@@ -38,7 +41,7 @@ public class ScriptManager {
 
             //script_file = "C:/CloudMon/parsers/console/" + script_file;
 
-            jsp = new Parser_Javascript(script_file);
+            jsp = new Parser_Javascript(script_path + script_file);
         }
     }
 
@@ -51,6 +54,10 @@ public class ScriptManager {
         try {
             //log.trace(json_data);
 
+            //First eval js system files
+            jsp.eval_file(script_path + "build_json.js");
+            jsp.eval_file(script_path + "errors.js");
+
             Hashtable<String, Object> table = jsp.toTable("CloudMon_Javascript(" + json_data + ");");
 
             err = (String) table.get("error_message");
@@ -61,9 +68,8 @@ public class ScriptManager {
         }
         catch(Exception e) {
             //e.printStackTrace();
+            sr = new ScriptResult("","Could not parse javascript!",true);
             log.error("Unable to parse: " + e.getMessage());
-            //err = null;
-            //json_data = null;
         }
 
         return sr;

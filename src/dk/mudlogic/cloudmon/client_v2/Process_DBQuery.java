@@ -1,15 +1,16 @@
 package dk.mudlogic.cloudmon.client_v2;
 
 import dk.mudlogic.ServerGlobalData;
+import dk.mudlogic.cloudmon.store.SendMail;
 import dk.mudlogic.query.DBQuery;
 import dk.mudlogic.scripts.ScriptManager;
 import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
 import dk.mudlogic.scripts.ScriptResult;
+import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.database.MSSql;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
 import org.json.simple.JSONArray;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -22,15 +23,17 @@ public class Process_DBQuery {
     private MSSql sql;
     private v2ProcessCommand pTable;
     private DB_ProcessReturnData returnData;
+    private GroupConfig MAIN_CONFIG;
     private ArrayList<String> errors = new ArrayList<>();
 
     private boolean failed;
     private String result;
 
-    public Process_DBQuery(DB_ProcessReturnData prd,v2ProcessCommand pTable) {
+    public Process_DBQuery(GroupConfig main_config,DB_ProcessReturnData prd,v2ProcessCommand pTable) {
         //log.setTracerTitle(Process_DBQuery.class);
 
         this.returnData = prd;
+        this.MAIN_CONFIG = main_config;
         this.pTable = pTable;
         this.failed = false;
 
@@ -51,13 +54,17 @@ public class Process_DBQuery {
         try {
             this.failed = false;
 
-            String host = pTable.get_str("client_url") + "\\" + pTable.get_str("host_name");
-            this.sql = new MSSql(host,pTable.get_str("username"),pTable.get_str("password"),pTable.get_str("database_name"));
+            String host = pTable.get_str("host_name");
+            String username = pTable.get_str("username");
+            String password = pTable.get_str("password");
+            String db_name = pTable.get_str("database_name");
+            this.sql = new MSSql(host,username,password,db_name);
+
+            log.trace(host +"-"+username+"-"+password+"-"+db_name);
 
             sql.connect();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             this.failed = true;
-
             errors.add( e.getMessage() );
             //e.printStackTrace();
         }
@@ -73,11 +80,12 @@ public class Process_DBQuery {
             if (result != null) {
                 this.failed = true;
 
-                if (pTable.get_str("parser_script").equals(null)) {
+                if (!pTable.get_str("parser_script").equals(null)) {
                     //Run script manager with result string
 
-                    String path = ServerGlobalData.MAIN_CONFIG.group("server").get("install_path")+"parsers\\database\\"+pTable.get_str("parser_script");
-                    ScriptManager sm = new ScriptManager(path);
+                    String path = ServerGlobalData.MAIN_CONFIG.group("server").get("install_path")+"parsers\\";
+                    String file = "database\\"+pTable.get_str("parser_script");
+                    ScriptManager sm = new ScriptManager(path,file);
                     ScriptResult res = sm.parse(result);
 
                     if (res.has_error) {
@@ -93,10 +101,14 @@ public class Process_DBQuery {
 
         } catch (SQLException e) {
             this.failed = true;
-
             errors.add( e.getMessage() );
-           // log.error(e.getMessage());
+           log.error(e.getMessage());
             //e.printStackTrace();
+
+        } catch(NullPointerException ne) {
+            this.failed = true;
+            errors.add(ne.getMessage());
+            log.error(ne.getMessage());
         }
 
     }
@@ -115,7 +127,10 @@ public class Process_DBQuery {
         console_output(pTable, this.failed );
 
         //Update status
-        this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed) );
+        //status() returns true if changed
+        if ( this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed) ) ) {
+            new SendMail(this.MAIN_CONFIG,"CloudMon-NAV",pTable,this.failed);
+        }
     }
 
     /** Saves new process data
@@ -127,7 +142,7 @@ public class Process_DBQuery {
     private void save(v2ProcessCommand pTable,String result,String[] errors) {
 
         String err_str = jsonArray(errors);
-
+        result = addslashes(result);
         int client_id   = pTable.get_int("client_id");
         int group_id    = pTable.get_int("command_group_id");
         int cmd_id      = pTable.get_int("id");
@@ -136,7 +151,7 @@ public class Process_DBQuery {
     }
 
     private String addslashes(String s) {
-        s = s.replace("\'","\"");
+        if (s != null) { s = s.replace("\'","\""); }
 
         return s;
     }

@@ -2,6 +2,7 @@ package dk.mudlogic.cloudmon.client_v2;
 
 import dk.mudlogic.ServerGlobalData;
 import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
+import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
 
@@ -13,13 +14,14 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
     private LogTracer log = new LogFactory().tracer();
 
     private DB_ProcessReturnData returnData;
+    private GroupConfig MAIN_CONFIG;
 
-    public CloudMon_v2Client(DB_ProcessReturnData returnData,v2ProcessConfig config) {
+    public CloudMon_v2Client(GroupConfig main_config,DB_ProcessReturnData returnData,v2ProcessConfig config) {
         super(config);
         this.returnData = returnData;
+        this.MAIN_CONFIG = main_config;
 
         log.setTracerTitle(CloudMon_v2Client.class);
-
     }
 
     /** The active content of what is running
@@ -51,7 +53,7 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
      */
     private void execCommandLine(v2ProcessCommand pTable) {
         //log.trace("Exec Command line");
-        new Process_CMDQuery(ServerGlobalData.PROCESS_RETURN_DATA,pTable);
+        new Process_CMDQuery(this.MAIN_CONFIG,ServerGlobalData.PROCESS_RETURN_DATA,pTable);
     }
 
     /** Executes SQL query
@@ -61,7 +63,7 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
     private void execDBQuery(v2ProcessCommand pTable) {
         //log.trace("Exec Database query");
 
-        new Process_DBQuery(this.returnData,pTable);
+        new Process_DBQuery(this.MAIN_CONFIG,this.returnData,pTable);
 
     }
 

@@ -12,16 +12,15 @@ public class CMDQuery {
 
     private LogTracer log = new LogFactory().tracer();
 
-    private String pHost;
-    private String pOptions;
+    private String query;
 
     private String result_str = null;
 
 
-    public CMDQuery(String pHost,String pOptions) {
+    public CMDQuery(String query) {
         log.setTracerTitle(CMDQuery.class);
-        this.pHost = pHost;
-        this.pOptions = pOptions;
+
+        this.query = query;
 
         start();
     }
@@ -45,7 +44,8 @@ public class CMDQuery {
         String end_res;
         String[] res;
         try {
-            res = new Execute(this.pHost, this.pOptions).result();
+
+            res = new Execute(this.query).result();
 
             result_str = jsonString(res);
         }

@@ -2,11 +2,14 @@ package dk.mudlogic.cloudmon.client_v2;
 
 import dk.mudlogic.ServerGlobalData;
 import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
+import dk.mudlogic.cloudmon.store.SendMail;
 import dk.mudlogic.query.CMDQuery;
 import dk.mudlogic.scripts.ScriptManager;
 import dk.mudlogic.scripts.ScriptResult;
+import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
+import dk.mudlogic.tools.strings.SearchAndReplace;
 
 /**
  * Created by soren.pedersen on 20-07-2016.
@@ -16,15 +19,17 @@ public class Process_CMDQuery {
     private LogTracer log = new LogFactory().tracer();
     private v2ProcessCommand pTable;
     private DB_ProcessReturnData returnData;
+    private GroupConfig MAIN_CONFIG;
 
     private String result_str;
     private boolean failed = false;
 
-    public Process_CMDQuery(DB_ProcessReturnData prd,v2ProcessCommand pTable) {
+    public Process_CMDQuery(GroupConfig main_config,DB_ProcessReturnData prd,v2ProcessCommand pTable) {
         //log.setTracerTitle(Process_CMDQuery.class);
 
         this.pTable = pTable;
         this.returnData = prd;
+        this.MAIN_CONFIG = main_config;
 
         connect();
         process();
@@ -33,10 +38,23 @@ public class Process_CMDQuery {
     private void connect() {
         String query = pTable.get_str("query_string");
         String hostname = pTable.get_str("host_name");
+        String username = pTable.get_str("username");
+        String password = pTable.get_str("password");
 
-        result_str = new CMDQuery(hostname,query).result();
+        //First setup query string
+        //Replace and tags in query with new value
+        SearchAndReplace sar = new SearchAndReplace(query);
+        sar.replace("{host_name}",hostname);
+        sar.replace("{username}",username);
+        sar.replace("{password}",password);
+        query = sar.getResult();
 
-        //log.trace(query + " " + result_str);
+        //Test output the query string
+        //log.trace(query);
+
+        result_str = new CMDQuery(query).result();
+
+        //log.trace(result_str);
     }
 
     private void process() {
@@ -44,8 +62,9 @@ public class Process_CMDQuery {
         //Run any parser scripts for the process
         if (result_str != null) {
             //Run script manager with result string
-            String path = ServerGlobalData.MAIN_CONFIG.group("server").get("install_path")+"parsers\\console\\"+pTable.get_str("parser_script");
-            ScriptManager sm = new ScriptManager(path);
+            String path = ServerGlobalData.MAIN_CONFIG.group("server").get("install_path")+"parsers\\";
+            String file = "console\\"+pTable.get_str("parser_script");
+            ScriptManager sm = new ScriptManager(path,file);
             ScriptResult result = sm.parse(result_str);
 
             finish(result);
@@ -66,9 +85,14 @@ public class Process_CMDQuery {
             result_str = result.result;
         }
 
-        console_output(this.pTable,this.failed);
+
         save(pTable,result.result,result.error_message);
-        this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString( this.failed ) );
+
+        try {
+            this.finalize();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
     }
 
     public boolean hasFailed() {
@@ -81,7 +105,17 @@ public class Process_CMDQuery {
         int group_id    = pTable.get_int("command_group_id");
         int cmd_id      = pTable.get_int("id");
 
+
+        console_output(this.pTable,this.failed);
         this.returnData.store(client_id,group_id,cmd_id,result,errors);
+
+        //Update status
+        //status() returns true if changed
+        if ( this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed) ) ) {
+            new SendMail(this.MAIN_CONFIG,"CloudMon-NOC",pTable,this.failed);
+        }
+
+        //this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString( this.failed ) );
     }
 
     private void console_output(v2ProcessCommand pTable, boolean status) {

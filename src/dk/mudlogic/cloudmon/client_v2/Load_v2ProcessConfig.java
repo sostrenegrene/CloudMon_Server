@@ -48,7 +48,8 @@ public class Load_v2ProcessConfig {
         String s = "SELECT cpc.*,ccg.group_name AS group_name,ccg.id AS group_id,clients.client_name,clients.id AS client_id,clients.url AS client_url " +
                 "FROM cloudmon_process_commands AS cpc " +
                 "JOIN cloudmon_process_command_groups AS ccg ON ccg.id = cpc.command_group_id " +
-                "JOIN cloudmon_process_clients AS clients ON ccg.client_id = clients.id";
+                "JOIN cloudmon_process_clients AS clients ON ccg.client_id = clients.id " +
+                "WHERE is_active = 1";
 
         return s;
     }

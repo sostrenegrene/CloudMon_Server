@@ -1,0 +1,10 @@
+Setup query:
+process name / any name
+process_type = query
+check_interval / any interval in seconds
+hostname = server instance (SQLEXPRESS etc.)
+query_string / the query
+username / db user
+password / users password
+database_name / name of database to open
+parser_script / name of script if any should be used (scripts need to be put in CloudMon/parsers/database)

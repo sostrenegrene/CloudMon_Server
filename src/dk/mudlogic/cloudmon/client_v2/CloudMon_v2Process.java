@@ -47,7 +47,11 @@ public abstract class CloudMon_v2Process {
         long thread_id = selected_command.threadID();
 
         //Checks if time has passed process interval
-        if ( time.unixTimeDiff(updated) > interval ) {
+        if ( time.unixTimeDiff(updated) >= interval ) {
+
+            if ( time.unixTimeDiff(updated) > (interval+1) ) {
+                log.warning(selected_command.get_str("client_name")+"/"+selected_command.get_str("process_name") + " is " + (time.unixTimeDiff(updated) - interval) + " sec. late!");
+            }
 
             //If process does not exist or exist but is finished | TRUE
             if ( (active_process.containsKey(thread_id) == false) ||  ((active_process.containsKey(thread_id)) && (active_process.get(thread_id).isAlive() == false)) ) {
@@ -80,11 +84,15 @@ public abstract class CloudMon_v2Process {
 
         Thread t = new Thread( pt );
 
-        active_process.put(t.getId(),t);
-        t.start();
+        //For safty
+        //Only start the new thread if selected command's thread id does not exits
+        if (active_process.containsKey(selected_command.threadID()) == false) {
+            active_process.put(t.getId(), t);
+            t.start();
 
-        selected_command.lastChanged(time.unixTime());
-        selected_command.threadID(t.getId());
+            selected_command.lastChanged(time.unixTime());
+            selected_command.threadID(t.getId());
+        }
 
     }
 

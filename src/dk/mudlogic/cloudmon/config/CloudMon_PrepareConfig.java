@@ -68,7 +68,7 @@ public class CloudMon_PrepareConfig {
             ArrayList<CloudMon_v2Client> tmp = new ArrayList<>();
             //Create client process list
             for (int i = 0; i< COMMAND_GROUPS.length; i++) {
-                CloudMon_v2Client client = new CloudMon_v2Client( new DB_ProcessReturnData(this.sql), COMMAND_GROUPS[i] );
+                CloudMon_v2Client client = new CloudMon_v2Client(this.MAIN_CONFIG, new DB_ProcessReturnData(this.sql), COMMAND_GROUPS[i] );
                 tmp.add(client);
             }
 
@@ -99,7 +99,21 @@ public class CloudMon_PrepareConfig {
 
             JSONObject db = (JSONObject) jobj.get("database");
             JSONObject server = (JSONObject) jobj.get("server");
+            JSONObject mail = (JSONObject) jobj.get("mail");
 
+            String[] db_keys = (String[]) db.keySet().toArray(new String[db.keySet().size()]);
+            String[] db_values = (String[]) db.values().toArray(new String[db.values().size()]);
+            MAIN_CONFIG.generate_group("database",db_keys,db_values);
+
+            String[] server_keys = (String[]) server.keySet().toArray(new String[server.keySet().size()]);
+            String[] server_values = (String[]) server.values().toArray(new String[server.values().size()]);
+            MAIN_CONFIG.generate_group("server",server_keys,server_values);
+
+            String[] mail_keys = (String[]) mail.keySet().toArray(new String[mail.keySet().size()]);
+            String[] mail_values = (String[]) mail.values().toArray(new String[mail.values().size()]);
+            MAIN_CONFIG.generate_group("mail",mail_keys,mail_values);
+
+            /*
             String url = (String)db.get("url");
             String database = (String) db.get("database");
             String username = (String) db.get("username");
@@ -109,6 +123,10 @@ public class CloudMon_PrepareConfig {
             String install_path = (String) server.get("install_path");
             String server_interval = (String) server.get("server_interval");
 
+            String mail_url = (String) mail.get("mail_url");
+            String mail_to = (String) mail.get("mail_to");
+            String send_mail = (String) mail.get("send_mail");
+
             MAIN_CONFIG.group("database").put("url",url);
             MAIN_CONFIG.group("database").put("database",database);
             MAIN_CONFIG.group("database").put("username",username);
@@ -117,6 +135,11 @@ public class CloudMon_PrepareConfig {
             MAIN_CONFIG.group("server").put("running",running);
             MAIN_CONFIG.group("server").put("install_path",install_path);
             MAIN_CONFIG.group("server").put("server_interval",server_interval);
+
+            MAIN_CONFIG.group("mail").put("mail_url",mail_url);
+            MAIN_CONFIG.group("mail").put("mail_to",mail_to);
+            MAIN_CONFIG.group("mail").put("send_mail",send_mail);
+            */
         }
         catch(Exception e) {
             log.error(e.getMessage());
