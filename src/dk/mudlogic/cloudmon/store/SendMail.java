@@ -15,7 +15,7 @@ public class SendMail {
     public SendMail(GroupConfig main_config, String type, v2ProcessCommand pTable, boolean is_failed) {
 
         //String to = "support@sostrenegrene.com";
-        String to = main_config.group("server").get("mail_to").toString();
+        String to = main_config.group("mail").get("mail_to").toString();
         String subject = statusStr(is_failed)+" "+type+" Status Changed for: " + pTable.get_str("client_name") + "/" + pTable.get_str("process_name") + "/" + pTable.get_str("process_type");
         String message = type + "<br>\r\n";
         message += "Status has changed<br>\r\n";

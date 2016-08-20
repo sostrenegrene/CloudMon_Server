@@ -40,8 +40,8 @@ public class DB_ProcessReturnData {
         }
     }
 
-    public boolean status(int client_id,int command_id,String status) {
-        return this.psh.status(client_id,command_id,status);
+    public boolean status(int client_id,int command_id,String status,int result_hash) {
+        return this.psh.status(client_id,command_id,status,result_hash);
     }
 
 }

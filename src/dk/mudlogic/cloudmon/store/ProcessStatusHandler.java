@@ -15,14 +15,13 @@ public class ProcessStatusHandler {
 
     private LogTracer log = new LogFactory().tracer();
 
-    private int command_id = 0;
     private MSSql sql;
 
     public ProcessStatusHandler(MSSql sql) {
         this.sql = sql;
     }
 
-    private boolean has_changed(String current_status) {
+    private boolean has_changed(int command_id,String current_status,int result_hash) {
         String query = "SELECT TOP 1 * FROM cloudmon_process_status_changelog WHERE command_id = '" + command_id + "' ORDER BY id DESC";
         try {
             SQLResult result = sql.query(query);
@@ -30,10 +29,15 @@ public class ProcessStatusHandler {
             //log.trace(result.toJSON());
 
             Hashtable ht = (Hashtable) result.getRows().get(0);
-            int last = ht.get("status").hashCode();
+            int last = ht.get("failed_status").hashCode();
+            int last_hash = Integer.parseInt( (String) ht.get("result_hash") );
             int current = current_status.hashCode();
 
             if ( last != current ) {
+                return true;
+            }
+            else if ((result_hash != 0) && (result_hash != last_hash)) {
+                log.warning("Hash no match R:" + result_hash + " L:" + last_hash);
                 return true;
             }
             else {
@@ -51,16 +55,27 @@ public class ProcessStatusHandler {
         }
     }
 
-    public boolean status(int client_id,int command_id,String status) {
-        this.command_id = command_id;
+    private String getStatusString(String status) {
+        if (status.equals("true")) { return "FAILED"; }
+        else if (status.equals("false")) { return "OK"; }
+        else { return null; }
+    }
+
+    public boolean status(int client_id,int command_id,String status,int result_hash) {
         String query;
 
         //If status has changed, setup query to update status and add new return data id
-        boolean changed = has_changed(status);
+        boolean changed = has_changed(command_id,status,result_hash);
         if (changed) {
-            query = "UPDATE cloudmon_process_commands SET status = '"+status+"' WHERE id = '"+command_id+"';";
-            query += "INSERT INTO cloudmon_process_status_changelog (timestamp,client_id,command_id,status,start_return_data_id) " +
-                     "VALUES (GETDATE(),'"+client_id+"','"+command_id+"','"+status+"', (SELECT MAX(id) FROM cloudmon_process_return_data WHERE command_id = '"+command_id+"' GROUP BY command_id) );";
+            query = "UPDATE cloudmon_process_commands SET status = '"+getStatusString(status)+"' WHERE id = '"+command_id+"';";
+            query += "INSERT INTO cloudmon_process_status_changelog (timestamp,client_id,command_id,status,failed_status,result_hash,start_return_data_id) " +
+                     "VALUES (GETDATE()," +
+                            "'"+client_id+"'," +
+                            "'"+command_id+"'," +
+                            "'"+getStatusString(status)+"'," +
+                            "'"+status+"'," +
+                            "'"+result_hash+"'," +
+                            "(SELECT MAX(id) FROM cloudmon_process_return_data WHERE command_id = '"+command_id+"' GROUP BY command_id));";
         }
         //Update the latest return data id to last status change
         else {

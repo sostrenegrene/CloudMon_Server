@@ -58,6 +58,10 @@ public class CloudMon_PrepareConfig {
         return CLIENTS;
     }
 
+    /** Loads command list from database
+     * Generates array of process clients
+     *
+     */
     public void setup_clients() {
         //log.trace("setup client data");
 

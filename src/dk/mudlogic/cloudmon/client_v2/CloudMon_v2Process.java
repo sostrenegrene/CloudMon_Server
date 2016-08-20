@@ -8,12 +8,21 @@ import java.util.Hashtable;
 
 /**
  * Created by soren.pedersen on 10-07-2016.
+ *
+ * CloudMon_v2Process is an abstract class that handles the execution of
+ * the CloudMon_v2Client it extends
+ *
+ * It will start a new thread that calls the clients processExecute() method
+ * along with the process command for the client to execute
+ *
  */
 public abstract class CloudMon_v2Process {
 
     private LogTracer log = new LogFactory().tracer();
 
+    //Config table for the process command
     private v2ProcessConfig config;
+
     private TimeHandler time = new TimeHandler();
 
     //Holds the currently active process threads
@@ -26,6 +35,7 @@ public abstract class CloudMon_v2Process {
         this.config = config;
     }
 
+    //to be override in the client
     abstract void processExecute(v2ProcessCommand process_command);
 
     /** Return the currently selected process
@@ -42,13 +52,17 @@ public abstract class CloudMon_v2Process {
         //Ready next command table in the list
         selected_command = this.config.getNextItem();
 
+        //Get when the command was last run
         int updated = selected_command.lastChanged();
+        //Get the interval time for the command
         int interval = selected_command.get_int("check_interval");
+        //Get thread id
         long thread_id = selected_command.threadID();
 
-        //Checks if time has passed process interval
+        //Checks if last run time has passed process interval time
         if ( time.unixTimeDiff(updated) >= interval ) {
 
+            //If process is running late, write warning message
             if ( time.unixTimeDiff(updated) > (interval+1) ) {
                 log.warning(selected_command.get_str("client_name")+"/"+selected_command.get_str("process_name") + " is " + (time.unixTimeDiff(updated) - interval) + " sec. late!");
             }
@@ -77,11 +91,14 @@ public abstract class CloudMon_v2Process {
 
     }
 
+    /** Runs the process in a new thread
+     *
+     */
     private void startProcess() {
         //log.trace("Process start ");
 
+        //Create new thread handler with process command
         v2ProcessThread pt = new v2ProcessThread(this, selected_command);
-
         Thread t = new Thread( pt );
 
         //For safty
@@ -90,12 +107,17 @@ public abstract class CloudMon_v2Process {
             active_process.put(t.getId(), t);
             t.start();
 
+            //Update commands last run time
             selected_command.lastChanged(time.unixTime());
+            //Update thread id
             selected_command.threadID(t.getId());
         }
 
     }
 
+    /** Start new process
+     *
+     */
     public void start() {
 
         if (isProcessReady()) {

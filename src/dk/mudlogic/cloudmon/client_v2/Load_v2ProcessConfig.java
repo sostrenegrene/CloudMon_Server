@@ -11,6 +11,10 @@ import java.util.Hashtable;
 
 /**
  * Created by soren.pedersen on 06-07-2016.
+ *
+ * Load config for all process commands from database
+ * and generate and v2ProcessConfig[] array
+ *
  */
 public class Load_v2ProcessConfig {
 

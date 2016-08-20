@@ -8,6 +8,15 @@ import dk.mudlogic.tools.log.LogTracer;
 
 /**
  * Created by soren.pedersen on 10-07-2016.
+ *
+ * CloudMon_v2Client does all command call handling
+ * to either database or commandline.
+ * Client is loaded in CloudMon_PrepareConfig
+ * This client is saved in the main client array
+ *
+ * Extends Cloudmon_v2Process that handles all execution of the client
+ * v2Process handles the thread that runs and calls the clients processExecute() method
+ *
  */
 public class CloudMon_v2Client extends CloudMon_v2Process {
 
@@ -16,10 +25,13 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
     private DB_ProcessReturnData returnData;
     private GroupConfig MAIN_CONFIG;
 
+    private int result_hash;
+
     public CloudMon_v2Client(GroupConfig main_config,DB_ProcessReturnData returnData,v2ProcessConfig config) {
         super(config);
         this.returnData = returnData;
         this.MAIN_CONFIG = main_config;
+        this.result_hash = 0;
 
         log.setTracerTitle(CloudMon_v2Client.class);
     }
@@ -54,6 +66,7 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
     private void execCommandLine(v2ProcessCommand pTable) {
         //log.trace("Exec Command line");
         new Process_CMDQuery(this.MAIN_CONFIG,ServerGlobalData.PROCESS_RETURN_DATA,pTable);
+
     }
 
     /** Executes SQL query

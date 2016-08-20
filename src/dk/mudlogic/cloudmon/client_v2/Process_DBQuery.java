@@ -11,6 +11,10 @@ import dk.mudlogic.tools.database.MSSql;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -42,7 +46,12 @@ public class Process_DBQuery {
         finish();
     }
 
-    public boolean hasFailed() {
+    public int result_hash() {
+        try { return result.hashCode(); }
+        catch (Exception e) { return 0; }
+    }
+
+    private boolean hasFailed() {
         return failed;
     }
 
@@ -78,6 +87,7 @@ public class Process_DBQuery {
 
             //Run any parser scripts for the process
             if (result != null) {
+
                 this.failed = true;
 
                 if (!pTable.get_str("parser_script").equals(null)) {
@@ -103,12 +113,14 @@ public class Process_DBQuery {
             this.failed = true;
             errors.add( e.getMessage() );
            log.error(e.getMessage());
-            //e.printStackTrace();
+            e.printStackTrace();
 
         } catch(NullPointerException ne) {
             this.failed = true;
             errors.add(ne.getMessage());
             log.error(ne.getMessage());
+
+            ne.printStackTrace();
         }
 
     }
@@ -119,6 +131,8 @@ public class Process_DBQuery {
     private void finish() {
         String[] err_list = errors.toArray(new String[errors.size()]);
 
+        log.trace(result);
+
         //Save log entry
         if ( ( result != null ) || (err_list.length >= 1) ) {
             save(pTable, result, err_list);
@@ -128,7 +142,7 @@ public class Process_DBQuery {
 
         //Update status
         //status() returns true if changed
-        if ( this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed) ) ) {
+        if ( this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed),result_hash() ) ) {
             new SendMail(this.MAIN_CONFIG,"CloudMon-NAV",pTable,this.failed);
         }
     }
@@ -143,6 +157,7 @@ public class Process_DBQuery {
 
         String err_str = jsonArray(errors);
         result = addslashes(result);
+
         int client_id   = pTable.get_int("client_id");
         int group_id    = pTable.get_int("command_group_id");
         int cmd_id      = pTable.get_int("id");

@@ -35,6 +35,11 @@ public class Process_CMDQuery {
         process();
     }
 
+    public int result_hash() {
+        try { return result_str.hashCode(); }
+        catch (Exception e) { return 0; }
+    }
+
     private void connect() {
         String query = pTable.get_str("query_string");
         String hostname = pTable.get_str("host_name");
@@ -111,7 +116,7 @@ public class Process_CMDQuery {
 
         //Update status
         //status() returns true if changed
-        if ( this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed) ) ) {
+        if ( this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed),result_hash() ) ) {
             new SendMail(this.MAIN_CONFIG,"CloudMon-NOC",pTable,this.failed);
         }
 
