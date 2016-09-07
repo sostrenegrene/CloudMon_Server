@@ -13,45 +13,73 @@ import java.util.Hashtable;
  */
 public class ProcessStatusHandler {
 
+    private final int NO_NEW_STATUS = 0;
+    private final int NEW_STATUS = 1;
+    private final int NEW_DATA = 2;
+
     private LogTracer log = new LogFactory().tracer();
 
     private MSSql sql;
+    private String change_reason = "";
 
     public ProcessStatusHandler(MSSql sql) {
         this.sql = sql;
     }
 
-    private boolean has_changed(int command_id,String current_status,int result_hash) {
+    private SQLResult get_last_change(int command_id) throws SQLException {
+        SQLResult result;
+
         String query = "SELECT TOP 1 * FROM cloudmon_process_status_changelog WHERE command_id = '" + command_id + "' ORDER BY id DESC";
+        result = sql.query(query);
+
+        return result;
+    }
+
+    private int has_changed(int command_id,String current_status,int result_hash) {
+
         try {
-            SQLResult result = sql.query(query);
-            //log.trace(query);
-            //log.trace(result.toJSON());
+            SQLResult result = get_last_change(command_id);
 
+            //Get last changelog row
             Hashtable ht = (Hashtable) result.getRows().get(0);
-            int last = ht.get("failed_status").hashCode();
-            int last_hash = Integer.parseInt( (String) ht.get("result_hash") );
-            int current = current_status.hashCode();
+            //Hash of last status from changelog
+            int last_status_hash = ht.get("failed_status").hashCode();
+            //Hash from last result data
+            int last_result_hash = Integer.parseInt( (String) ht.get("result_hash") );
+            //Hash from current status
+            int current_status_hash = current_status.hashCode();
 
-            if ( last != current ) {
-                return true;
+            //Status has changed if last and current is not equal
+            if ( last_status_hash != current_status_hash ) {
+                log.warning("Status changed [NEW STATUS]");
+
+                change_reason = command_id+": New Status";
+                return NEW_STATUS;
             }
-            else if ((result_hash != 0) && (result_hash != last_hash)) {
-                log.warning("Hash no match R:" + result_hash + " L:" + last_hash);
-                return true;
+            //Status has changed if result_hash is not 0 and not equal to last_result_hash
+            else if ( ( Boolean.parseBoolean(current_status) == true ) && (result_hash != 0) && (result_hash != last_result_hash)) {
+                log.warning("Status changed [NEW RESULT DATA]");
+
+                change_reason = command_id+": Change in data";
+                return NEW_DATA;
             }
+            //Else status has not changed
             else {
-                return false;
+
+                change_reason = "";
+                return NO_NEW_STATUS;
             }
 
         } catch (SQLException e) {
             //e.printStackTrace();
 
-            return true;
+            change_reason = command_id+": " + e.getSQLState();
+            return NEW_STATUS;
         } catch (Exception e) {
             //2e.printStackTrace();
 
-            return true;
+            change_reason = command_id+": " + e.getLocalizedMessage();
+            return NEW_STATUS;
         }
     }
 
@@ -61,12 +89,17 @@ public class ProcessStatusHandler {
         else { return null; }
     }
 
+    public String getChange_reason() {
+        return change_reason;
+    }
+
     public boolean status(int client_id,int command_id,String status,int result_hash) {
         String query;
 
         //If status has changed, setup query to update status and add new return data id
-        boolean changed = has_changed(command_id,status,result_hash);
-        if (changed) {
+        int changed = has_changed(command_id,status,result_hash);
+        //if ( (changed == NEW_STATUS) || (changed == NEW_DATA) ) {
+        if ( (changed == NEW_STATUS) ) {
             query = "UPDATE cloudmon_process_commands SET status = '"+getStatusString(status)+"' WHERE id = '"+command_id+"';";
             query += "INSERT INTO cloudmon_process_status_changelog (timestamp,client_id,command_id,status,failed_status,result_hash,start_return_data_id) " +
                      "VALUES (GETDATE()," +
@@ -92,6 +125,6 @@ public class ProcessStatusHandler {
             e.printStackTrace();
         }
 
-        return changed;
+        return (changed == NEW_STATUS);
     }
 }

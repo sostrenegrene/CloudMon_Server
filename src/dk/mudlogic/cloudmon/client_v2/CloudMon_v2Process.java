@@ -35,6 +35,9 @@ public abstract class CloudMon_v2Process {
         this.config = config;
     }
 
+    //Will update config table for process
+    public void update_config(v2ProcessConfig config) { this.config = config; }
+
     //to be override in the client
     abstract void processExecute(v2ProcessCommand process_command);
 
@@ -43,6 +46,11 @@ public abstract class CloudMon_v2Process {
      * @return
      */
     public v2ProcessCommand current_command() { return selected_command; }
+
+    public void update_current_command(v2ProcessCommand cmd) {
+        selected_command = cmd;
+        config.update_row(selected_command);
+    }
 
     /** Returns if the next process is ready to run
      *

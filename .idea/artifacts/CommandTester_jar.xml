@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="CommandTester:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/CommandTester_jar</output-path>
+    <root id="root">
+      <element id="archive" name="CommandTester.jar">
+        <element id="module-output" name="CommandTester" />
+        <element id="module-output" name="CloudMon_DataManager" />
+      </element>
+      <element id="library" level="project" name="ToolsLib_jar" />
+      <element id="library" level="project" name="json-simple-1.1.1" />
+      <element id="library" level="project" name="sqljdbc4" />
+    </root>
+  </artifact>
+</component>

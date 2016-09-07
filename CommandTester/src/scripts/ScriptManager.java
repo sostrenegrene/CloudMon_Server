@@ -1,4 +1,4 @@
-package dk.mudlogic.scripts;
+package scripts;
 
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
@@ -68,9 +68,8 @@ public class ScriptManager {
         }
         catch(Exception e) {
             //e.printStackTrace();
-            String out = "Could not parse javascript! " + e.getMessage();
-            sr = new ScriptResult("",out,true);
-            log.error(out);
+            sr = new ScriptResult("","Could not parse javascript!",true);
+            log.error("Unable to parse: " + e.getMessage());
         }
 
         return sr;

@@ -16,6 +16,7 @@ public class CloudMon_ConfigThread implements Runnable {
         return pconfig;
     }
 
+
     public void stop() {
         this.isAlive = false;
     }

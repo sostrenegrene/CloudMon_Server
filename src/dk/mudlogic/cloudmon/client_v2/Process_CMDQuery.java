@@ -10,6 +10,7 @@ import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
 import dk.mudlogic.tools.strings.SearchAndReplace;
+import dk.mudlogic.tools.time.TimeHandler;
 
 /**
  * Created by soren.pedersen on 20-07-2016.
@@ -33,6 +34,10 @@ public class Process_CMDQuery {
 
         connect();
         process();
+    }
+
+    public v2ProcessCommand getpTable() {
+        return pTable;
     }
 
     public int result_hash() {
@@ -91,7 +96,7 @@ public class Process_CMDQuery {
         }
 
 
-        save(pTable,result.result,result.error_message);
+        save(result.result,result.error_message);
 
         try {
             this.finalize();
@@ -104,7 +109,7 @@ public class Process_CMDQuery {
         return this.failed;
     }
 
-    private void save(v2ProcessCommand pTable,String result,String errors) {
+    private void save(String result,String errors) {
 
         int client_id   = pTable.get_int("client_id");
         int group_id    = pTable.get_int("command_group_id");
@@ -117,10 +122,31 @@ public class Process_CMDQuery {
         //Update status
         //status() returns true if changed
         if ( this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed),result_hash() ) ) {
-            new SendMail(this.MAIN_CONFIG,"CloudMon-NOC",pTable,this.failed);
+
+            //Make time handler
+            TimeHandler t = new TimeHandler();
+            //Get time diff in seconds from last notify to now
+            int time_diff = t.unixTimeDiff( pTable.lastNotify() );
+
+            //if time diff is >= to mail interval
+            if (pTable.lastNotify() != 0) {
+                if (pTable.get_int("mail_interval") < time_diff) {
+
+                    //Send mail
+                    new SendMail(this.MAIN_CONFIG, "CloudMon-NOC", pTable, this.failed, this.returnData.changeReason());
+
+                    //Update last notification time
+                    pTable.lastNotify(t.unixTime());
+                }
+            }
+            else {
+                //Update last notification time
+                pTable.lastNotify(t.unixTime());
+            }
+
+            log.warning(pTable.get_str("process_name") + " mail interval " + pTable.get_int("mail_interval") + "s current time " + time_diff);
         }
 
-        //this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString( this.failed ) );
     }
 
     private void console_output(v2ProcessCommand pTable, boolean status) {

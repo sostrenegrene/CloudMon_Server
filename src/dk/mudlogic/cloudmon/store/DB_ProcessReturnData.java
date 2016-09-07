@@ -44,4 +44,8 @@ public class DB_ProcessReturnData {
         return this.psh.status(client_id,command_id,status,result_hash);
     }
 
+    public String changeReason() {
+        return this.psh.getChange_reason();
+    }
+
 }

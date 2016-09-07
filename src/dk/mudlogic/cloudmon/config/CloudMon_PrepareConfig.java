@@ -58,6 +58,10 @@ public class CloudMon_PrepareConfig {
         return CLIENTS;
     }
 
+    public void getClientConfig() {
+
+    }
+
     /** Loads command list from database
      * Generates array of process clients
      *
@@ -116,34 +120,6 @@ public class CloudMon_PrepareConfig {
             String[] mail_keys = (String[]) mail.keySet().toArray(new String[mail.keySet().size()]);
             String[] mail_values = (String[]) mail.values().toArray(new String[mail.values().size()]);
             MAIN_CONFIG.generate_group("mail",mail_keys,mail_values);
-
-            /*
-            String url = (String)db.get("url");
-            String database = (String) db.get("database");
-            String username = (String) db.get("username");
-            String password = (String) db.get("password");
-
-            String running = (String) server.get("running");
-            String install_path = (String) server.get("install_path");
-            String server_interval = (String) server.get("server_interval");
-
-            String mail_url = (String) mail.get("mail_url");
-            String mail_to = (String) mail.get("mail_to");
-            String send_mail = (String) mail.get("send_mail");
-
-            MAIN_CONFIG.group("database").put("url",url);
-            MAIN_CONFIG.group("database").put("database",database);
-            MAIN_CONFIG.group("database").put("username",username);
-            MAIN_CONFIG.group("database").put("password",password);
-
-            MAIN_CONFIG.group("server").put("running",running);
-            MAIN_CONFIG.group("server").put("install_path",install_path);
-            MAIN_CONFIG.group("server").put("server_interval",server_interval);
-
-            MAIN_CONFIG.group("mail").put("mail_url",mail_url);
-            MAIN_CONFIG.group("mail").put("mail_to",mail_to);
-            MAIN_CONFIG.group("mail").put("send_mail",send_mail);
-            */
         }
         catch(Exception e) {
             log.error(e.getMessage());

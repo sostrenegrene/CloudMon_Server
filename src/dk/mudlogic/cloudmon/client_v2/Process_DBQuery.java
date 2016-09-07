@@ -10,6 +10,7 @@ import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.database.MSSql;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
+import dk.mudlogic.tools.time.TimeHandler;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -44,6 +45,10 @@ public class Process_DBQuery {
         connect();
         process();
         finish();
+    }
+
+    public v2ProcessCommand getpTable() {
+        return pTable;
     }
 
     public int result_hash() {
@@ -131,29 +136,50 @@ public class Process_DBQuery {
     private void finish() {
         String[] err_list = errors.toArray(new String[errors.size()]);
 
-        log.trace(result);
+        //log.trace(result);
 
         //Save log entry
         if ( ( result != null ) || (err_list.length >= 1) ) {
-            save(pTable, result, err_list);
+            save(result, err_list);
         }
 
-        console_output(pTable, this.failed );
+        console_output(this.failed );
 
         //Update status
         //status() returns true if changed
         if ( this.returnData.status( pTable.get_int("client_id"),pTable.get_int("id"), Boolean.toString(this.failed),result_hash() ) ) {
-            new SendMail(this.MAIN_CONFIG,"CloudMon-NAV",pTable,this.failed);
+
+            //Make time handler
+            TimeHandler t = new TimeHandler();
+            //Get time diff in seconds from last notify to now
+            int time_diff = t.unixTimeDiff( pTable.lastNotify() );
+
+            if (pTable.lastNotify() != 0) {
+                //if time diff is >= to mail interval
+                if (pTable.get_int("mail_interval") <= time_diff ) {
+
+                    //Send mail
+                    new SendMail(this.MAIN_CONFIG, "CloudMon-NAV", pTable, this.failed, this.returnData.changeReason());
+
+                    //Update last notification time
+                    pTable.lastNotify(t.unixTime());
+                }
+            }
+            else {
+                //Update last notification time
+                pTable.lastNotify(t.unixTime());
+            }
+
+            //log.trace(pTable.get_str("process_name") + " mail interval " + pTable.get_int("mail_interval") + "s current time " + time_diff);
         }
     }
 
     /** Saves new process data
      *
-     * @param pTable v2ProcessCommand
      * @param result String
      * @param errors String[]
      */
-    private void save(v2ProcessCommand pTable,String result,String[] errors) {
+    private void save(String result,String[] errors) {
 
         String err_str = jsonArray(errors);
         result = addslashes(result);
@@ -182,7 +208,7 @@ public class Process_DBQuery {
         return a.toJSONString();
     }
 
-    private void console_output(v2ProcessCommand pTable, boolean status) {
+    private void console_output( boolean status) {
         String status_str = "[ID:" + pTable.get_str("id")+"]";
         status_str += "[" + pTable.get_str("client_name")+"]";
         status_str += "[" + pTable.get_str("group_name")+"]";

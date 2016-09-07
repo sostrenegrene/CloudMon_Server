@@ -15,6 +15,7 @@ public class v2ProcessCommand {
 
     private long thread_id = 0;
     private int last_changed = 0;
+    private int last_notify = 0;//Notify is used for mail and other notifications
 
     private Hashtable<String,String> command_table;
 
@@ -55,6 +56,12 @@ public class v2ProcessCommand {
 
     public void lastChanged(int time) {
         last_changed = time;
+    }
+
+    public int lastNotify() { return last_notify; }
+
+    public void lastNotify(int time) {
+        last_notify = time;
     }
 
     public String get_str(String name) {

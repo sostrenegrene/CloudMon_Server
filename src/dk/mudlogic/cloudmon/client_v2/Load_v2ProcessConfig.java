@@ -75,7 +75,8 @@ public class Load_v2ProcessConfig {
         for (int i=0; i<rows.size(); i++) {
             Hashtable row_table = (Hashtable) rows.get(i);
 
-            //Get name, group name and url of client process
+            //Get id, name, group name and url of client process
+            int client_id = Integer.parseInt( (String) row_table.get("client_id") );
             String client_name = (String) row_table.get("client_name");
             String group_name = (String) row_table.get("group_name");
             String url = (String) row_table.get("url");
@@ -95,7 +96,7 @@ public class Load_v2ProcessConfig {
             else {
 
                 //Create new config group with client name, group name and client url
-                v2ProcessConfig clc = new v2ProcessConfig(client_name,url,group_name);
+                v2ProcessConfig clc = new v2ProcessConfig(client_id,client_name,url,group_name);
                 //Add row table to group
                 clc.add_command(row_table);
                 //Add group to tmp

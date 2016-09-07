@@ -65,8 +65,8 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
      */
     private void execCommandLine(v2ProcessCommand pTable) {
         //log.trace("Exec Command line");
-        new Process_CMDQuery(this.MAIN_CONFIG,ServerGlobalData.PROCESS_RETURN_DATA,pTable);
-
+       Process_CMDQuery cmdQuery = new Process_CMDQuery(this.MAIN_CONFIG,ServerGlobalData.PROCESS_RETURN_DATA,pTable);
+        this.update_current_command(cmdQuery.getpTable());
     }
 
     /** Executes SQL query
@@ -75,9 +75,8 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
      */
     private void execDBQuery(v2ProcessCommand pTable) {
         //log.trace("Exec Database query");
-
-        new Process_DBQuery(this.MAIN_CONFIG,this.returnData,pTable);
-
+        Process_DBQuery dbQuery = new Process_DBQuery(this.MAIN_CONFIG,this.returnData,pTable);
+        this.update_current_command(dbQuery.getpTable());
     }
 
 }
