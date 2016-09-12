@@ -2,7 +2,6 @@ package dk.mudlogic.cloudmon.client_v2;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Iterator;
 
 /**
  * Created by soren.pedersen on 09-07-2016.

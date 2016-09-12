@@ -1,7 +1,6 @@
 package dk.mudlogic.cloudmon.config;
 
 import dk.mudlogic.Main;
-import dk.mudlogic.ServerGlobalData;
 import dk.mudlogic.cloudmon.client_v2.CloudMon_v2Client;
 import dk.mudlogic.cloudmon.client_v2.Load_v2ProcessConfig;
 import dk.mudlogic.cloudmon.client_v2.v2ProcessConfig;

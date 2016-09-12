@@ -1,8 +1,8 @@
 package dk.mudlogic.cloudmon.client_v2;
 
-import dk.mudlogic.ServerGlobalData;
 import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
 import dk.mudlogic.cloudmon.store.SendMail;
+import dk.mudlogic.mail.MailMan;
 import dk.mudlogic.query.CMDQuery;
 import dk.mudlogic.scripts.ScriptManager;
 import dk.mudlogic.scripts.ScriptResult;
@@ -21,16 +21,18 @@ public class Process_CMDQuery {
     private v2ProcessCommand pTable;
     private DB_ProcessReturnData returnData;
     private GroupConfig MAIN_CONFIG;
+    private MailMan mailman;
 
     private String result_str;
     private boolean failed = false;
 
-    public Process_CMDQuery(GroupConfig main_config,DB_ProcessReturnData prd,v2ProcessCommand pTable) {
+    public Process_CMDQuery(GroupConfig main_config, DB_ProcessReturnData prd, v2ProcessCommand pTable, MailMan mailman) {
         //log.setTracerTitle(Process_CMDQuery.class);
 
         this.pTable = pTable;
         this.returnData = prd;
         this.MAIN_CONFIG = main_config;
+        this.mailman = mailman;
 
         connect();
         process();
@@ -72,7 +74,8 @@ public class Process_CMDQuery {
         //Run any parser scripts for the process
         if (result_str != null) {
             //Run script manager with result string
-            String path = ServerGlobalData.MAIN_CONFIG.group("server").get("install_path")+"parsers\\";
+            //String path = ServerGlobalData.MAIN_CONFIG.group("server").get("install_path")+"parsers\\";
+            String path = MAIN_CONFIG.group("server").get("install_path")+"parsers\\";
             String file = "console\\"+pTable.get_str("parser_script");
             ScriptManager sm = new ScriptManager(path,file);
             ScriptResult result = sm.parse(result_str);
@@ -133,7 +136,8 @@ public class Process_CMDQuery {
                 if (pTable.get_int("mail_interval") < time_diff) {
 
                     //Send mail
-                    new SendMail(this.MAIN_CONFIG, "CloudMon-NOC", pTable, this.failed, this.returnData.changeReason());
+                    SendMail mail = new SendMail(this.MAIN_CONFIG,this.mailman);
+                    mail.send(pTable.get_str("client_name"),pTable.get_str("process_name"),pTable.get_str("process_type"),this.failed,this.returnData.changeReason());
 
                     //Update last notification time
                     pTable.lastNotify(t.unixTime());

@@ -18,7 +18,7 @@ import java.util.Hashtable;
  */
 public class Load_v2ProcessConfig {
 
-    private LogTracer log = new LogFactory(Load_v2ProcessConfig.class.getName()).tracer();
+    private LogTracer log = new LogFactory().tracer();
     private SQLResult result;
 
     private v2ProcessConfig[] config;

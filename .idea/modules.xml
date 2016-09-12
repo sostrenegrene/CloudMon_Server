@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/CloudMon_DBStore/CloudMon_DBStore.iml" filepath="$PROJECT_DIR$/CloudMon_DBStore/CloudMon_DBStore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CloudMon_DataManager/CloudMon_DataManager.iml" filepath="$PROJECT_DIR$/CloudMon_DataManager/CloudMon_DataManager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CloudMon_ProcessClient/CloudMon_ProcessClient.iml" filepath="$PROJECT_DIR$/CloudMon_ProcessClient/CloudMon_ProcessClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CloudMon_Server.iml" filepath="$PROJECT_DIR$/CloudMon_Server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CommandTester/CommandTester.iml" filepath="$PROJECT_DIR$/CommandTester/CommandTester.iml" />
+    </modules>
+  </component>
+</project>

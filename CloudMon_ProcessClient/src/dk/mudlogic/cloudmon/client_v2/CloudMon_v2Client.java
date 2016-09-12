@@ -1,7 +1,7 @@
 package dk.mudlogic.cloudmon.client_v2;
 
-import dk.mudlogic.ServerGlobalData;
 import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
+import dk.mudlogic.mail.MailMan;
 import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
@@ -24,6 +24,7 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
 
     private DB_ProcessReturnData returnData;
     private GroupConfig MAIN_CONFIG;
+    private MailMan MAILMAN;
 
     private int result_hash;
 
@@ -32,6 +33,7 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
         this.returnData = returnData;
         this.MAIN_CONFIG = main_config;
         this.result_hash = 0;
+        this.MAILMAN = new MailMan(main_config.group("mail").get("mail_url").toString());
 
         log.setTracerTitle(CloudMon_v2Client.class);
     }
@@ -65,7 +67,7 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
      */
     private void execCommandLine(v2ProcessCommand pTable) {
         //log.trace("Exec Command line");
-       Process_CMDQuery cmdQuery = new Process_CMDQuery(this.MAIN_CONFIG,ServerGlobalData.PROCESS_RETURN_DATA,pTable);
+       Process_CMDQuery cmdQuery = new Process_CMDQuery(this.MAIN_CONFIG,this.returnData,pTable,this.MAILMAN);
         this.update_current_command(cmdQuery.getpTable());
     }
 
@@ -75,7 +77,7 @@ public class CloudMon_v2Client extends CloudMon_v2Process {
      */
     private void execDBQuery(v2ProcessCommand pTable) {
         //log.trace("Exec Database query");
-        Process_DBQuery dbQuery = new Process_DBQuery(this.MAIN_CONFIG,this.returnData,pTable);
+        Process_DBQuery dbQuery = new Process_DBQuery(this.MAIN_CONFIG,this.returnData,pTable,this.MAILMAN);
         this.update_current_command(dbQuery.getpTable());
     }
 

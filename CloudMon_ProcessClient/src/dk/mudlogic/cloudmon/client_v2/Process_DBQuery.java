@@ -1,10 +1,10 @@
 package dk.mudlogic.cloudmon.client_v2;
 
-import dk.mudlogic.ServerGlobalData;
+import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
 import dk.mudlogic.cloudmon.store.SendMail;
+import dk.mudlogic.mail.MailMan;
 import dk.mudlogic.query.DBQuery;
 import dk.mudlogic.scripts.ScriptManager;
-import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
 import dk.mudlogic.scripts.ScriptResult;
 import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.database.MSSql;
@@ -12,10 +12,7 @@ import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
 import dk.mudlogic.tools.time.TimeHandler;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
-import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -29,18 +26,20 @@ public class Process_DBQuery {
     private v2ProcessCommand pTable;
     private DB_ProcessReturnData returnData;
     private GroupConfig MAIN_CONFIG;
+    private MailMan mailman;
     private ArrayList<String> errors = new ArrayList<>();
 
     private boolean failed;
     private String result;
 
-    public Process_DBQuery(GroupConfig main_config,DB_ProcessReturnData prd,v2ProcessCommand pTable) {
+    public Process_DBQuery(GroupConfig main_config, DB_ProcessReturnData prd, v2ProcessCommand pTable, MailMan mailman) {
         //log.setTracerTitle(Process_DBQuery.class);
 
         this.returnData = prd;
         this.MAIN_CONFIG = main_config;
         this.pTable = pTable;
         this.failed = false;
+        this.mailman = mailman;
 
         connect();
         process();
@@ -98,7 +97,7 @@ public class Process_DBQuery {
                 if (!pTable.get_str("parser_script").equals(null)) {
                     //Run script manager with result string
 
-                    String path = ServerGlobalData.MAIN_CONFIG.group("server").get("install_path")+"parsers\\";
+                    String path = MAIN_CONFIG.group("server").get("install_path")+"parsers\\";
                     String file = "database\\"+pTable.get_str("parser_script");
                     ScriptManager sm = new ScriptManager(path,file);
                     ScriptResult res = sm.parse(result);
@@ -159,7 +158,11 @@ public class Process_DBQuery {
                 if (pTable.get_int("mail_interval") <= time_diff ) {
 
                     //Send mail
-                    new SendMail(this.MAIN_CONFIG, "CloudMon-NAV", pTable, this.failed, this.returnData.changeReason());
+                   // new SendMail(this.MAIN_CONFIG, "CloudMon-NAV", pTable, this.failed, this.returnData.changeReason());
+
+                    //Send mail
+                    SendMail mail = new SendMail(this.MAIN_CONFIG,this.mailman);
+                    mail.send(pTable.get_str("client_name"),pTable.get_str("process_name"),pTable.get_str("process_type"),this.failed,this.returnData.changeReason());
 
                     //Update last notification time
                     pTable.lastNotify(t.unixTime());
