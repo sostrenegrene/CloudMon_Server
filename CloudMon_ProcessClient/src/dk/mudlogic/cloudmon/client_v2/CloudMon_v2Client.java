@@ -6,7 +6,7 @@ import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
 
-/**
+/** @deprecated
  * Created by soren.pedersen on 10-07-2016.
  *
  * CloudMon_v2Client does all command call handling

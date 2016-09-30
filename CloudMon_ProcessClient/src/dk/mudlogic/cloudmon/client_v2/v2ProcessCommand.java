@@ -2,7 +2,7 @@ package dk.mudlogic.cloudmon.client_v2;
 
 import java.util.Hashtable;
 
-/**
+/** @deprecated
  * Created by soren.pedersen on 12-07-2016.
  */
 public class v2ProcessCommand {

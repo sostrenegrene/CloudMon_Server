@@ -64,9 +64,6 @@ public class ScriptManager {
             has_error = (Boolean) table.get("has_error");
             json_data = (String) table.get("result");
 
-            //err = err.replace("'","\"");
-            //json_data = json_data.replace("'","\"");
-
             //log.trace(json_data);
 
             sr = new ScriptResult(json_data,err,has_error);
@@ -75,7 +72,7 @@ public class ScriptManager {
             //e.printStackTrace();
             String out = "Could not parse javascript! " + e.getMessage();
             sr = new ScriptResult("",out,true);
-            log.error(out);
+            //log.error(out);
         }
 
         return sr;

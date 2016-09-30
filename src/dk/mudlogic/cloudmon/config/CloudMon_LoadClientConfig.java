@@ -1,8 +1,11 @@
 package dk.mudlogic.cloudmon.config;
 
+import dk.mudlogic.cloudmon.changelog.Changelog;
 import dk.mudlogic.cloudmon.client_v3.client.v3Client;
 import dk.mudlogic.cloudmon.client_v3.client.v3CommandGroup;
 import dk.mudlogic.cloudmon.client_v3.client.v3Command;
+import dk.mudlogic.cloudmon.returndata.Returndata;
+import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.database.MSSql;
 import dk.mudlogic.tools.database.SQLResult;
 import dk.mudlogic.tools.log.LogFactory;
@@ -19,12 +22,14 @@ public class CloudMon_LoadClientConfig {
 
     private LogTracer log = new LogFactory().tracer();
 
+    private GroupConfig MAIN_CONFIG;
     private MSSql SQL;
     private SQLResult result;
 
-    public CloudMon_LoadClientConfig(MSSql sql) {
+    public CloudMon_LoadClientConfig(MSSql sql,GroupConfig main_config) {
         log.setTracerTitle(CloudMon_PrepareConfig.class);
 
+        this.MAIN_CONFIG = main_config;
         this.SQL = sql;
 
         load();
@@ -62,8 +67,13 @@ public class CloudMon_LoadClientConfig {
             //Get id, name, group name
             int client_id       = Integer.parseInt((String) client_table.get("client_id"));
             String client_name  = (String) client_table.get("client_name");
+
+            //Setup changelog and returndata handlers
+            Changelog clog = new Changelog(SQL);
+            Returndata rdata = new Returndata(SQL);
+
             //Make new client
-            v3Client client     = new v3Client(client_id,client_name);
+            v3Client client     = new v3Client(client_id,client_name,clog,rdata);
 
             //Check that the client does not exist
             if ( !clients.containsKey( client.getID() ) ) {
@@ -126,6 +136,7 @@ public class CloudMon_LoadClientConfig {
 
             int groupID = Integer.parseInt( (String)command_table.get("command_group_id") );
             if ( groupID == group.getID() ) {
+                command_table.put("install_path",MAIN_CONFIG.group("server").get("install_path").getValue());
                 group.add_Command(new v3Command(command_table));
             }
 

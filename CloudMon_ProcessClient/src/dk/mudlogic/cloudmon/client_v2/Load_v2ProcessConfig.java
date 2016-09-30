@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-/**
+/** @deprecated
  * Created by soren.pedersen on 06-07-2016.
  *
  * Load config for all process commands from database

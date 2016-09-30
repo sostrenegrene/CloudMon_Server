@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="ToolsLib_jar" level="project" />
     <orderEntry type="module" module-name="CloudMon_DataManager" />
+    <orderEntry type="library" name="commons-lang3-3" level="project" />
   </component>
 </module>

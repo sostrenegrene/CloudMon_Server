@@ -12,7 +12,7 @@ import dk.mudlogic.tools.log.LogTracer;
 import dk.mudlogic.tools.strings.SearchAndReplace;
 import dk.mudlogic.tools.time.TimeHandler;
 
-/**
+/** @deprecated
  * Created by soren.pedersen on 20-07-2016.
  */
 public class Process_CMDQuery {

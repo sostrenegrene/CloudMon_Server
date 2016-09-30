@@ -29,7 +29,7 @@ public class DBQuery {
         this.query = query;
     }
 
-    private String json() {
+    private String json(  ) {
 
         String out = null;
 

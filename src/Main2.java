@@ -20,7 +20,7 @@ public class Main2 {
 
     public static void main(String[] args) {
 
-        GroupConfig MAIN_CONFIG = setup_config();
+        GroupConfig MAIN_CONFIG = file_config();
 
         //Setup database connection
         MSSql sql = new MSSql(MAIN_CONFIG.group("database").get("url").toString(),
@@ -32,13 +32,25 @@ public class Main2 {
             //Start database connection
             sql.connect();
 
-            CloudMon_LoadClientConfig loadClient = new CloudMon_LoadClientConfig(sql);
+            CloudMon_LoadClientConfig loadClient = new CloudMon_LoadClientConfig(sql,MAIN_CONFIG);
             v3Client[] clients = loadClient.get_Clients();
             log.trace("Loaded " + clients.length + " clients");
-            clients[0].run();
+
+            boolean isAlive = true;
+            while(isAlive) {
+                for (int i = 0; i < clients.length; i++) {
+                    clients[i].run();
+                }
+
+                try {
+                    Thread.sleep(100);
+                }
+                catch(Exception e) { e.printStackTrace(); }
+            }
+
         } //No initial database connection, exit
         catch(Exception e) {
-            log.error("No connection to database! ");
+            log.error("No connection to database!");
             log.error(e.getMessage());
             e.printStackTrace();
         }
@@ -46,8 +58,11 @@ public class Main2 {
 
     }
 
-
-    public static GroupConfig setup_config() {
+    /** Loads the initial config file
+     *
+     * @return GroupConfig
+     */
+    public static GroupConfig file_config() {
         //log.trace("setup config data");
 
         GroupConfig MAIN_CONFIG;

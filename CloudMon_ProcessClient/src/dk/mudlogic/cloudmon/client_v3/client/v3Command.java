@@ -7,6 +7,8 @@ import java.util.Hashtable;
  */
 public class v3Command {
 
+    private final int CLIENT_ID;
+    private final int GROUP_ID;
     private final int COMMAND_ID;
 
     private long THREAD_ID      = 0;
@@ -15,16 +17,33 @@ public class v3Command {
 
     private Hashtable<String,String> command_table;
 
+    private v3CommandResult RESULT = null;
+
     public v3Command(Hashtable<String,String> command_table) {
 
         this.command_table = command_table;
 
+        this.CLIENT_ID = get_int("client_id");
+        this.GROUP_ID = get_int("command_group_id");
         this.COMMAND_ID = get_int("id");
+    }
+
+    public int getClientID() {
+        return CLIENT_ID;
+    }
+
+    public int getGroupID() {
+        return GROUP_ID;
+    }
+
+    public int getCommandID() {
+        return COMMAND_ID;
     }
 
     public void thread_id(long id) {
         this.THREAD_ID = id;
     }
+
     public long thread_id() {
         return THREAD_ID;
     }
@@ -32,6 +51,7 @@ public class v3Command {
     public void last_changed(int time) {
         this.LAST_CHANGED = time;
     }
+
     public int last_changed() {
         return this.LAST_CHANGED;
     }
@@ -39,6 +59,7 @@ public class v3Command {
     public void last_notify(int time) {
         this.LAST_NOTIFY = time;
     }
+
     public int last_notify() {
         return this.LAST_NOTIFY;
     }
@@ -56,5 +77,13 @@ public class v3Command {
     }
 
     public long get_long(String name) { return Long.parseLong( get_str(name) ); }
+
+    public void setResult(v3CommandResult result) {
+        RESULT = result;
+    }
+
+    public v3CommandResult getResult() {
+        return RESULT;
+    }
 
 }

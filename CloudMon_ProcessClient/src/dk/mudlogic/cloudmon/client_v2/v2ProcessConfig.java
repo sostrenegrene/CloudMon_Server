@@ -3,7 +3,7 @@ package dk.mudlogic.cloudmon.client_v2;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-/**
+/** @deprecated
  * Created by soren.pedersen on 09-07-2016.
  *
  * Holds config values for client processes

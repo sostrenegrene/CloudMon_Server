@@ -6,7 +6,7 @@ import dk.mudlogic.tools.time.TimeHandler;
 
 import java.util.Hashtable;
 
-/**
+/** @deprecated
  * Created by soren.pedersen on 10-07-2016.
  *
  * CloudMon_v2Process is an abstract class that handles the execution of

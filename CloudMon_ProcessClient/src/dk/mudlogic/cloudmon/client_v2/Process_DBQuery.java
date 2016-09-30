@@ -16,7 +16,7 @@ import org.json.simple.JSONArray;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-/**
+/** @deprecated
  * Created by soren.pedersen on 19-07-2016.
  */
 public class Process_DBQuery {
