@@ -28,12 +28,15 @@ public class CloudMon_LoadClientConfig {
 
     public CloudMon_LoadClientConfig(MSSql sql,GroupConfig main_config) {
         log.setTracerTitle(CloudMon_PrepareConfig.class);
+        log.trace("Start");
 
         this.MAIN_CONFIG = main_config;
         this.SQL = sql;
 
         load();
         //setup_clients();
+
+        log.trace("Done");
     }
 
     public v3Client[] get_Clients() {
@@ -82,6 +85,8 @@ public class CloudMon_LoadClientConfig {
                 //Add command groups to client
                 client = add_Groups(client,rows);
 
+
+
                 //Save client
                 clients.put(client.getID(),client);
             }
@@ -114,10 +119,12 @@ public class CloudMon_LoadClientConfig {
 
             //If clients id matches groups client id and group does not exist
             if ( (group.getClientID() == client.getID()) && (client.getGroup(group.getID()) == null) ) {
-                log.trace("Adding group "+group.getName()+" to "+client.getName() );
+                //log.trace("Adding group "+group.getName()+" to "+client.getName() );
 
                 //Add commands to group
                 group = add_Commands(group,rows);
+
+                log.trace("Loaded " + group.get_CommandList().length + " commands in " + group.getName());
 
                 //Save group in client
                 client.add_Group(group);
@@ -150,7 +157,7 @@ public class CloudMon_LoadClientConfig {
      * @return String | Query
      */
     private String query_commands() {
-        String s = "SELECT cpc.*,ccg.group_name AS group_name,ccg.id AS group_id,clients.client_name,clients.id AS client_id,clients.url AS client_url " +
+        String s = "SELECT cpc.*,ccg.group_name AS group_name,ccg.id AS group_id,clients.client_name,clients.client_description,clients.id AS client_id,clients.url AS client_url " +
                 "FROM cloudmon_process_commands AS cpc " +
                 "JOIN cloudmon_process_command_groups AS ccg ON ccg.id = cpc.command_group_id " +
                 "JOIN cloudmon_process_clients AS clients ON ccg.client_id = clients.id " +
@@ -158,41 +165,5 @@ public class CloudMon_LoadClientConfig {
 
         return s;
     }
-
-    /** Loads command list from database
-     * Generates array of process clients
-     *
-     */
-    /*
-    public void setup_clients() {
-        //log.trace("setup client data");
-
-        try {
-            //Load client command groups
-            COMMAND_GROUPS = new Load_v2ProcessConfig(this.SQL).getConfig();
-
-            ArrayList<CloudMon_v2Client> tmp = new ArrayList<>();
-            //Create client process list
-            for (int i = 0; i< COMMAND_GROUPS.length; i++) {
-                CloudMon_v2Client client = new CloudMon_v2Client(this.MAIN_CONFIG, new DB_ProcessReturnData(this.SQL), COMMAND_GROUPS[i] );
-                tmp.add(client);
-            }
-
-            CLIENTS = tmp;
-            tmp = null;
-
-            log.trace("Loaded " + CLIENTS.size() + " clients");
-        }
-        //Failed creating process list
-        catch(Exception e) {
-            log.error("Unable to load client configuration ");
-            log.error(e.getMessage());
-            e.printStackTrace();
-
-            closeAndExit();
-        }
-
-    }
-    */
 
 }

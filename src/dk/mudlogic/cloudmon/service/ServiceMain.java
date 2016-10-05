@@ -1,4 +1,4 @@
-package dk.mudlogic.cloudmon.setvice;
+package dk.mudlogic.cloudmon.service;
 
 import dk.mudlogic.tools.console.Execute;
 import dk.mudlogic.tools.log.LogFactory;

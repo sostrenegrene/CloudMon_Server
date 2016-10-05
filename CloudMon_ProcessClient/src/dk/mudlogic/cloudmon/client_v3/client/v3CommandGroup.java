@@ -40,28 +40,41 @@ public class v3CommandGroup extends CallbackHandler {
         this.GROUP_NAME = name;
         this.CLIENT_ID = client_id;
 
-        log.trace("Loaded " + get_CommandList().length + " commands in group " + this.GROUP_NAME);
+        //log.trace("Loaded " + get_CommandList().length + " commands in " + this.GROUP_NAME);
     }
 
-    /** Updates replaces the cached command with updated command from process
+    /** Replaces the cached command with updated command from process
      *
      * @param command v3Command
      */
     private void update_Command(v3Command command) {
 
+        //Get command list
         v3Command[] commands = get_CommandList();
 
+        //Check if there's any commands
         if (commands.length > 0) {
-            for (int i = 0; i < commands.length; i++) {
-                if (command.get_int("id") == commands[i].get_int("id")) {
-                    log.trace("Command update: " + command.get_str("process_name") + " " + time.unixTimeDiff(command.last_changed()));
 
+            //Get next command
+            for (int i = 0; i < commands.length; i++) {
+
+                //If command matches
+                if (command.get_int("id") == commands[i].get_int("id")) {
+                    //log.trace("Command update: " + command.get_str("process_name") + " " + time.unixTimeDiff(command.last_changed()));
+
+                    //Remove cached command
                     remove_Command(command);
+
+                    //Add updated command
                     this.COMMANDS.add(command);
                 }
+
             }
+
         }
+        //If there's no commands in the list
         else {
+            //Add the command
             this.COMMANDS.add(command);
         }
 
@@ -75,12 +88,18 @@ public class v3CommandGroup extends CallbackHandler {
 
         v3Command[] commands = get_CommandList();
 
+        //Get next command
         for (int i=0; i<commands.length; i++) {
-            if (command.get_int("id") == commands[i].get_int("id")) {
-                log.trace("Command update: " + command.get_str("process_name") + " " + time.unixTimeDiff( command.last_changed() ));
 
+            //Check if the command matches
+            if (command.get_int("id") == commands[i].get_int("id")) {
+
+                //log.trace("Command update: " + command.get_str("process_name") + " " + time.unixTimeDiff( command.last_changed() ));
+                //remove the command from list
                 this.COMMANDS.remove(i);
+
             }
+
         }
 
     }
@@ -151,15 +170,20 @@ public class v3CommandGroup extends CallbackHandler {
         //Get array with all commands in this group
         v3Command[] commands = get_CommandList(); //this.COMMANDS.toArray(new v3Command[this.COMMANDS.size()]);
 
+        //If there's any commands to exec
         if (commands.length > 0) {
+
             //Exec all commands in list
             for (int i = 0; i < commands.length; i++) {
                 v3Command command = commands[i];
 
+                //If command is ready to run
                 if (is_ready(command)) {
+
                     //Remove command from list
-                    //It will be added when process finishes and do a callback to this
+                    //It will be added when process finishes and does a callback to this
                     remove_Command( command );
+
                     //Exec command with callback to this.CallbackHandler
                     new v3Command_Process(command, this);
                 }
@@ -179,7 +203,7 @@ public class v3CommandGroup extends CallbackHandler {
     @Override
     public void catch_Callback(String name,Object obj) {
         name = name.trim();
-        log.trace("Callback: " + name);
+        //log.trace("Callback: " + name);
 
         switch(name) {
             case "v3Command":

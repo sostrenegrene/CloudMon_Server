@@ -53,9 +53,6 @@ public class v3Query_Console {
         sar.replace("{password}",password);
         query = sar.getResult();
 
-        //Test output the query string
-        //log.trace(query);
-
         //Run the query
         start_query( query );
 
@@ -63,7 +60,7 @@ public class v3Query_Console {
 
         result.setErrorMessages( error_str );
 
-        log.trace(result.getResult() +" " + result.getErrorMessages());
+        //log.trace(result.getResult() +" " + result.getErrorMessages());
 
         command.setResult( result );
     }

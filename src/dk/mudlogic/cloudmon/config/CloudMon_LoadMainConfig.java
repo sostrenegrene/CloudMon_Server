@@ -20,10 +20,13 @@ public class CloudMon_LoadMainConfig {
 
     public CloudMon_LoadMainConfig(String config_file) {
         log.setTracerTitle(CloudMon_PrepareConfig.class);
+        log.trace("Start");
 
         this.CONFIG_FILE = config_file;
 
         load();
+
+        log.trace("Done");
     }
 
     private void load() {

@@ -43,7 +43,6 @@ public class v3Query_Database {
             result = this.sql.query( query );
 
             String jstring = getJson(result);
-            log.trace("DB RESULT: " + jstring );
 
             this.command.setResult( new v3CommandResult( jstring ) );
         } catch (SQLException e) {

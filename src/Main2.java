@@ -3,6 +3,7 @@ import dk.mudlogic.Main;
 
 import dk.mudlogic.cloudmon.client_v3.client.v3Client;
 import dk.mudlogic.cloudmon.config.CloudMon_LoadClientConfig;
+import dk.mudlogic.mail.v2MailMan;
 import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.database.MSSql;
 import dk.mudlogic.tools.files.File_Reader;
@@ -19,14 +20,27 @@ public class Main2 {
     public static LogTracer log = new LogFactory().tracer();
 
     public static void main(String[] args) {
+        log.trace("Starting CloudMon Server");
+
+        run();
+
+        //String s = "Create PDF Log for Invoice 3145491 - Handlingen kunne ikke fuldføres, fordi en record i tabellen Log var låst af en anden bruger. Prøv aktiviteten igen.";
+        //CharSequence c = s.subSequence(0,100);
+        //String small = s.substring(0,100);
+
+        //log.trace(c.toString());
+
+    }
+
+    public static void run() {
 
         GroupConfig MAIN_CONFIG = file_config();
 
         //Setup database connection
         MSSql sql = new MSSql(MAIN_CONFIG.group("database").get("url").toString(),
-                              MAIN_CONFIG.group("database").get("username").toString(),
-                              MAIN_CONFIG.group("database").get("password").toString(),
-                              MAIN_CONFIG.group("database").get("database").toString());
+                MAIN_CONFIG.group("database").get("username").toString(),
+                MAIN_CONFIG.group("database").get("password").toString(),
+                MAIN_CONFIG.group("database").get("database").toString());
 
         try {
             //Start database connection
@@ -54,7 +68,6 @@ public class Main2 {
             log.error(e.getMessage());
             e.printStackTrace();
         }
-
 
     }
 

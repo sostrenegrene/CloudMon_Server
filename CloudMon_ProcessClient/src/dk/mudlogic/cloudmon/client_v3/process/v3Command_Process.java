@@ -1,7 +1,6 @@
 package dk.mudlogic.cloudmon.client_v3.process;
 
 import dk.mudlogic.cloudmon.client_v3.client.v3Command;
-import dk.mudlogic.cloudmon.client_v3.client.v3CommandResult;
 import dk.mudlogic.cloudmon.client_v3.query.v3Query_Console;
 import dk.mudlogic.cloudmon.client_v3.query.v3Query_Database;
 import dk.mudlogic.scripts.ScriptManager;
@@ -10,7 +9,6 @@ import dk.mudlogic.tools.callback.CallbackHandler;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
 import dk.mudlogic.tools.time.TimeHandler;
-import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
  * Created by soren.pedersen on 08-09-2016.
@@ -53,19 +51,16 @@ public class v3Command_Process {
 
         //If process type is console
         if (PTYPE_CONSOLE == type) {
-            log.trace( "Console: " + command.get_str("process_name") );
+            //log.trace( "Console: " + command.get_str("process_name") );
 
             command = new v3Query_Console(command).getCommand();
         }
 
         //If process type is database
         if (PTYPE_QUERY == type) {
+            //log.trace( "Database: " + command.get_str("process_name") );
 
-            //TODO do SQL query
             command = new v3Query_Database(command).getCommand();
-           // log.trace("Do database query");
-            log.trace( "Database: " + command.get_str("process_name") );
-
         }
 
         //Run javascript parser
@@ -87,10 +82,10 @@ public class v3Command_Process {
             if (command.getResult().hasResult()) {
                 ScriptResult sc_result = sm.parse(command.getResult().getResult());
 
-                log.trace("Script: " + sc_result.error_message + " " + sc_result.result);
+                //log.trace("Script: " + sc_result.error_message + " " + sc_result.result);
                 command.getResult().setParsedResult(sc_result.result);
 
-                String err = sc_result.error_message + " " + command.getResult().getErrorMessages();
+                String err = sc_result.error_message;// + " " + command.getResult().getErrorMessages();
                 command.getResult().setErrorMessages(err);
             }
         }

@@ -28,7 +28,7 @@ public class Returndata {
         try {
             sql.query(query);
 
-            log.trace("Saved " + client_id+":"+group_id+":"+cmd_id);
+            //log.trace("Saved " + client_id+":"+group_id+":"+cmd_id);
         }
         catch(Exception e) {
             log.error(e.getMessage());

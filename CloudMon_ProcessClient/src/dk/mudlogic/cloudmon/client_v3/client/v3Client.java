@@ -43,7 +43,7 @@ public class v3Client extends CallbackHandler {
         this.CHANGELOG = clog;
         this.RETURN_DATA = rdata;
 
-        log.trace(this.CLIENT_NAME);
+        //log.trace(this.CLIENT_NAME);
     }
 
     /** Returns name of client
@@ -114,38 +114,43 @@ public class v3Client extends CallbackHandler {
                 v3Command command = (v3Command) obj;
 
                 //Debug result data
-                log.trace(command.getResult().getResult());
+                //log.trace(command.getResult().getResult());
 
                 //Get string of status bool
                 String status = Boolean.toString(command.getResult().hasErrors());
 
                 //Update changelog if command result has changed
-                /*
-                boolean has_changed = CHANGELOG.status(CLIENT_ID,
-                                                        command.getCommandID(),
-                                                        status,
-                                                        command.getResult().getResultHash());
-                */
                 int changelog_type = CHANGELOG.has_changed(command.getCommandID(),
                                                             status,
                                                             command.getResult().getResultHash());
 
+                //If changelog is either new status or changed data on status
                 if (changelog_type != Changelog.NO_NEW_STATUS) {
 
+                    //If command has result or error data
                     if ( command.getResult().hasResult() || command.getResult().hasErrors() ) {
+
                         //Save return data from result
                         RETURN_DATA.save(command.getClientID(),
                                 command.getGroupID(),
                                 command.getCommandID(),
                                 command.getResult().getParsedResult(),
                                 command.getResult().getErrorMessages());
+
                     }
 
+                        //Update changelog status for command
                         CHANGELOG.status(CLIENT_ID,
                                 command.getCommandID(),
                                 status,
                                 command.getResult().getResultHash(), changelog_type);
 
+                    //If changelog is new status, send mail notify
+                    if (changelog_type == Changelog.NEW_STATUS) {
+                        //Send mail notify
+                        v3Client_Notify notify = new v3Client_Notify("localhost","support@sostrenegrene.com");
+                        notify.notify_email(command);
+                    }
                 }
 
                 break;
