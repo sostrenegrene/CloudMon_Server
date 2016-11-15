@@ -3,15 +3,13 @@
     <output-path>$PROJECT_DIR$/out/artifacts/CloudMon_Server_jar</output-path>
     <root id="root">
       <element id="archive" name="CloudMon_Server.jar">
-        <element id="directory" name="META-INF">
-          <element id="file-copy" path="$PROJECT_DIR$/CloudMon_DataManager/src/META-INF/MANIFEST.MF" />
-        </element>
         <element id="module-output" name="CloudMon_Server" />
-        <element id="module-output" name="CloudMon_DataManager" />
       </element>
-      <element id="library" level="project" name="ToolsLib_jar" />
-      <element id="library" level="project" name="json-simple-1.1.1" />
+      <element id="library" level="project" name="commons-lang3-3" />
       <element id="library" level="project" name="sqljdbc4" />
+      <element id="library" level="project" name="json-simple-1.1.1" />
+      <element id="library" level="project" name="mail" />
+      <element id="library" level="project" name="ToolsLib_jar" />
     </root>
   </artifact>
 </component>

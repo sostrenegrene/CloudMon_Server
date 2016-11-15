@@ -1,11 +1,11 @@
 package dk.mudlogic;
 
 
-import dk.mudlogic.cloudmon.client_v2.CloudMon_v2Client;
+import dk.mudlogic.cloudmon.client.client_v2.CloudMon_v2Client;
 import dk.mudlogic.cloudmon.config.CloudMon_ConfigThread;
 import dk.mudlogic.cloudmon.config.CloudMon_PrepareConfig;
-import dk.mudlogic.cloudmon.store.DB_ProcessReturnData;
-import dk.mudlogic.mail.MailMan;
+import dk.mudlogic.cloudmon.dbstore.store.DB_ProcessReturnData;
+import dk.mudlogic.cloudmon.datamanager.mail.MailMan;
 import dk.mudlogic.tools.database.MSSql;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;

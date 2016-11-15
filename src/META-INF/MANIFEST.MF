@@ -1,3 +1,5 @@
 Manifest-Version: 1.0
-Main-Class: dk.mudlogic.Main
+Class-Path: commons-lang3-3.4.jar commons-lang3-3.4-javadoc.jar sqljdb
+ c4.jar json-simple-1.1.1.jar mail.jar ToolsLib.jar
+Main-Class: dk.mudlogic.Main2
 

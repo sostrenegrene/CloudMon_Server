@@ -10,8 +10,7 @@
     <orderEntry type="library" name="ToolsLib_jar" level="project" />
     <orderEntry type="library" name="sqljdbc4" level="project" />
     <orderEntry type="library" name="json-simple-1.1.1" level="project" />
-    <orderEntry type="module" module-name="CloudMon_DataManager" />
-    <orderEntry type="module" module-name="CloudMon_DBStore" />
-    <orderEntry type="module" module-name="CloudMon_ProcessClient" />
+    <orderEntry type="library" name="commons-lang3-3" level="project" />
+    <orderEntry type="library" name="mail" level="project" />
   </component>
 </module>

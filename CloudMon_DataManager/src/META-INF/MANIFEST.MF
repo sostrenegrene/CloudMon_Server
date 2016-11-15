@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: ToolsLib.jar json-simple-1.1.1.jar sqljdbc4.jar
-Main-Class: dk.mudlogic.Main
-
