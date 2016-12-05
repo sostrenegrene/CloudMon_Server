@@ -18,6 +18,7 @@ public class Main2 {
     public static LogTracer log = new LogFactory().tracer();
 
     public static GroupConfig MAIN_CONFIG;
+    public static CloudMon_LoadClientConfig LOAD_CONFIG;
 
     public static boolean isAlive = true;
 
@@ -42,6 +43,7 @@ public class Main2 {
             sql.connect();
 
             CloudMon_LoadClientConfig loadClient = new CloudMon_LoadClientConfig(sql,Main2.MAIN_CONFIG);
+            Main2.LOAD_CONFIG = loadClient;
             v3Client[] clients = loadClient.toArray();
 
             log.trace("Loaded " + clients.length + " clients");

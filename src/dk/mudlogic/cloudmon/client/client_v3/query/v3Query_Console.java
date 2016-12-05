@@ -2,10 +2,11 @@ package dk.mudlogic.cloudmon.client.client_v3.query;
 
 import dk.mudlogic.cloudmon.client.client_v3.client.v3Command;
 import dk.mudlogic.cloudmon.client.client_v3.client.v3CommandResult;
+import dk.mudlogic.tools.Objects.strings.SearchAndReplace;
 import dk.mudlogic.tools.console.v2Execute;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
-import dk.mudlogic.tools.strings.SearchAndReplace;
+
 import org.json.simple.JSONArray;
 
 /** Performs a console command

@@ -1,6 +1,6 @@
 package dk.mudlogic.cloudmon.v3config;
 
-import dk.mudlogic.Main2;
+import dk.mudlogic.cloudmon.client.client_v3.client.v3Command;
 import dk.mudlogic.cloudmon.dbstore.changelog.Changelog;
 import dk.mudlogic.cloudmon.client.client_v3.client.v3Client;
 import dk.mudlogic.cloudmon.client.client_v3.client.v3CommandGroup;
@@ -53,6 +53,37 @@ public class CloudMon_LoadClientConfig {
         else {
             return null;
         }
+    }
+
+    public v3CommandGroup getCommandGroup(int client_id,int group_id) {
+
+        v3CommandGroup out = null;
+
+        if (CLIENTS.containsKey(client_id)) {
+            v3Client c = CLIENTS.get(client_id);
+
+            out = c.getGroup(group_id);
+        }
+
+        return out;
+    }
+
+    public v3Command getCommand(int client_id,int group_id,int command_id) {
+
+        v3Command out = null;
+
+        if (CLIENTS.containsKey(client_id)) {
+            v3Client c = CLIENTS.get(client_id);
+
+            if (c.getGroup(group_id) != null) {
+
+                v3CommandGroup g = c.getGroup(group_id);
+                out = g.getCommand(command_id);
+
+            }
+        }
+
+        return out;
     }
 
     public v3Client[] toArray() {

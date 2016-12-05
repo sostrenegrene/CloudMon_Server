@@ -1,5 +1,6 @@
 package dk.mudlogic.cloudmon.client.client_v3.client;
 
+import dk.mudlogic.Main2;
 import dk.mudlogic.cloudmon.client.client_v3.process.v3Command_Process;
 import dk.mudlogic.tools.log.LogFactory;
 import dk.mudlogic.tools.log.LogTracer;
@@ -23,7 +24,9 @@ public class v3CommandGroup extends CallbackHandler {
     private final String GROUP_NAME;
     private final int CLIENT_ID;
 
-    private AbstractList<v3Command> COMMANDS = new ArrayList<>();
+    private int group_hashcode = 0;
+
+    private ArrayList<v3Command> COMMANDS = new ArrayList<>();
     private TimeHandler time = new TimeHandler();
 
     private CallbackHandler CLIENT_CALLBACK;
@@ -46,6 +49,32 @@ public class v3CommandGroup extends CallbackHandler {
         SID.set_Name(name);
 
         //log.trace("Loaded " + get_CommandList().length + " commands in " + this.GROUP_NAME);
+
+        updateGroupHashcode();
+    }
+
+    public void updateGroupHashcode() {
+        //this.group_hashcode = this.hashCode();
+        SID.set_Hashcode( this.hashCode() );
+    }
+
+    public int getGroupHashcode() {
+        //return group_hashcode;
+        return SID.get_Hashcode();
+    }
+
+    public v3Command getCommand(int id) {
+
+        v3Command out = null;
+        v3Command[] c = this.COMMANDS.toArray(new v3Command[this.COMMANDS.size()]);
+        for (int i=0; i<c.length; i++) {
+
+            if (c[i].getIDs().get_CommandID() == id) {
+                out = c[i];
+            }
+        }
+
+        return out;
     }
 
     /** Replaces the cached command with updated command from process
@@ -57,25 +86,25 @@ public class v3CommandGroup extends CallbackHandler {
         //Get command list
         v3Command[] commands = get_CommandList();
 
+        v3Command newCommand = Main2.LOAD_CONFIG.getCommand(command.getClientID(),command.getGroupID(),command.getCommandID());
+
+        //Test for any differences in current and "updated" command
+        if (command.getIDs().get_Hashcode() != newCommand.getIDs().get_Hashcode()) {
+            newCommand.last_changed( command.last_changed() );
+            newCommand.setResult( command.getResult() );
+
+            command = newCommand;
+            log.warning("Updated command: " + command.get_str("process_name") +command.get_str("interval") + " to: " + newCommand.get_str("process_name") + newCommand.get_str("interval"));
+        }
+
         //Check if there's any commands
         if (commands.length > 0) {
 
-            //Get next command
-            //for (int i = 0; i < commands.length; i++) {
+            //Remove cached command
+            remove_Command(command);
 
-                //If command matches
-                //if (command.get_int("id") == commands[i].get_int("id")) {
-                //if (command.getIDs().get_CommandID() == commands[i].getIDs().get_CommandID()) {
-                    //log.trace("Command update: " + command.get_str("process_name") + " " + time.unixTimeDiff(command.last_changed()));
-
-                    //Remove cached command
-                    remove_Command(command);
-
-                    //Add updated command
-                    this.COMMANDS.add(command);
-                //}
-
-            //}
+            //Add updated command
+            this.COMMANDS.add(command);
 
         }
         //If there's no commands in the list
@@ -225,11 +254,12 @@ public class v3CommandGroup extends CallbackHandler {
                 v3Command command = (v3Command) obj;
                 //log.trace("Returned " + command.get_str("process_name") + " to group " + this.getName());
 
-                update_Command( command );
-
+                //Send to client, to be updated in changelog and return data
                 if ( command.getResult() != null) {
                     CLIENT_CALLBACK.callback("v3Command", command);
                 }
+
+                update_Command( command );
                 break;
         }
 

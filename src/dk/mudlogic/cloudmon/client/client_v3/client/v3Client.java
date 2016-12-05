@@ -24,6 +24,8 @@ public class v3Client extends CallbackHandler {
     private final int CLIENT_ID;
     private final String CLIENT_NAME;
 
+    private int client_hashcode = 0;
+
     private Hashtable<Integer,v3CommandGroup> GROUPS = new Hashtable<>();
 
     private Changelog CHANGELOG;
@@ -50,10 +52,29 @@ public class v3Client extends CallbackHandler {
         this.RETURN_DATA = rdata;
 
         //log.trace(this.CLIENT_NAME);
+
+        updateClientHashcode();
     }
 
     public void setConfig(GroupConfig config) {
         this.config = config;
+    }
+
+    /** Updates the current hashcode for this client instance
+     *
+     */
+    public void updateClientHashcode() {
+        //this.client_hashcode = this.hashCode();
+        SID.set_Hashcode( this.hashCode() );
+    }
+
+    /** Returns the current hashcode for this client instance
+     *
+     * @return int
+     */
+    public int getClientHashcode() {
+        //return this.client_hashcode;
+        return SID.get_Hashcode();
     }
 
     /** Returns a standard identifier for clients, groups and commands
@@ -95,6 +116,10 @@ public class v3Client extends CallbackHandler {
     public v3CommandGroup getGroup(int id) {
         try {return GROUPS.get(id); }
         catch(Exception e) { return null; }
+    }
+
+    public v3CommandGroup[] getGroups() {
+        return this.GROUPS.values().toArray(new v3CommandGroup[this.GROUPS.size()]);
     }
 
     /** Executes the client

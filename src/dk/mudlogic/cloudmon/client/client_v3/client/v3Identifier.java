@@ -11,6 +11,7 @@ class v3Identifier {
     private int CLIENT_ID = 0;
     private int GROUP_ID = 0;
     private int COMMAND_ID = 0;
+    private int HASHCODE = 0;
 
     public void set_Name(String name) { NAME = name; }
 
@@ -20,6 +21,9 @@ class v3Identifier {
 
     public void set_CommandID(int id) { COMMAND_ID = id; }
 
+    public void set_Hashcode(int hashcode) {
+        HASHCODE = hashcode;
+    }
 
     public String get_Name() { return NAME; }
 
@@ -29,5 +33,8 @@ class v3Identifier {
 
     public int get_CommandID() { return COMMAND_ID; }
 
+    public int get_Hashcode() {
+        return HASHCODE;
+    }
 
 }

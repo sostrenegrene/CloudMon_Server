@@ -32,6 +32,8 @@ public class v3Command {
         SID.set_GroupID( get_int("command_group_id") );
         SID.set_CommandID( get_int("id") );
         SID.set_Name( get_str("process_name") );
+
+        SID.set_Hashcode(this.hashCode());
     }
 
     /** Returns a standard identifier for clients, groups and commands
@@ -88,6 +90,8 @@ public class v3Command {
 
     public void setResult(v3CommandResult result) {
         RESULT = result;
+
+        SID.set_Hashcode(this.hashCode());
     }
 
     public v3CommandResult getResult() {
