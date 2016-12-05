@@ -19,6 +19,13 @@ public class v3Client_Notify {
 
         //Only send mail if command is mail active
         if (command.get_int("mail_active") == 1) {
+            String add_recipients = command.get_str("mail_recipients");
+
+            //If any additional recipients is found, add them to send_to string
+            if (add_recipients.trim().length() > 0) {
+                send_to += "," + add_recipients;
+            }
+
             send_mail(command, send_to);
         }
 
