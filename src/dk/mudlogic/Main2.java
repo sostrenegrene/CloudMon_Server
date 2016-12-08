@@ -1,6 +1,7 @@
 package dk.mudlogic;
 
 import dk.mudlogic.cloudmon.client.client_v3.client.v3Client;
+import dk.mudlogic.cloudmon.v3config.ClientUpdater;
 import dk.mudlogic.cloudmon.v3config.CloudMon_LoadClientConfig;
 import dk.mudlogic.tools.config.GroupConfig;
 import dk.mudlogic.tools.database.MSSql;
@@ -42,14 +43,19 @@ public class Main2 {
             //Start database connection
             sql.connect();
 
+            //Setup client config loading
             CloudMon_LoadClientConfig loadClient = new CloudMon_LoadClientConfig(sql,Main2.MAIN_CONFIG);
+            //Add client loader to global config
             Main2.LOAD_CONFIG = loadClient;
+            //Load initial client config
             v3Client[] clients = loadClient.toArray();
 
             log.trace("Loaded " + clients.length + " clients");
 
             boolean isAlive = true;
             while(Main2.isAlive) {
+                clients = new ClientUpdater(loadClient.getClients(),clients).getClients();
+
                 for (int i = 0; i < clients.length; i++) {
                     clients[i].run();
                 }

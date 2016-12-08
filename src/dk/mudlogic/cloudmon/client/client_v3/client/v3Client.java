@@ -1,5 +1,6 @@
 package dk.mudlogic.cloudmon.client.client_v3.client;
 
+import dk.mudlogic.Main2;
 import dk.mudlogic.cloudmon.dbstore.changelog.Changelog;
 import dk.mudlogic.cloudmon.dbstore.returndata.Returndata;
 import dk.mudlogic.tools.callback.CallbackHandler;
@@ -105,7 +106,11 @@ public class v3Client extends CallbackHandler {
      */
     public void add_Group(v3CommandGroup group) {
         group.set_ClientCallBack( this );
-        GROUPS.put(group.getID(),group);
+
+        //Removes the group if it exist,
+        if (GROUPS.containsKey(group.getID())) { GROUPS.remove(group.getID()); }
+
+        GROUPS.put(group.getID(), group);
     }
 
     /** Returns group matching id
@@ -128,14 +133,34 @@ public class v3Client extends CallbackHandler {
      */
     public void run() {
         //Get groups as array
-        v3CommandGroup[] groups = this.GROUPS.values().toArray(new v3CommandGroup[this.GROUPS.values().size()]);
+        //v3CommandGroup[] groups = this.GROUPS.values().toArray(new v3CommandGroup[this.GROUPS.values().size()]);
+        v3CommandGroup[] groups = getGroups();
 
-        //Get next group
-        for (int i=0; i<groups.length; i++) {
-            v3CommandGroup group = groups[i];
+        if (groups.length > 0) {
+            //Get next group
+            for (int i = 0; i < groups.length; i++) {
+                v3CommandGroup group = groups[i];
+                //Get updated group data
+                v3CommandGroup newGroup = Main2.LOAD_CONFIG.getCommandGroup(group.getClientID(), group.getID());
 
-            //Exec group
-            group.run(this);
+                //If command list has changed
+                //update all commands
+                //This will reset all command timers in this group!
+                try {
+                    if (group.commandCount(0) != newGroup.commandCount(0)) {
+                        this.GROUPS.get(group.getID()).update_CommandList(newGroup.get_CommandList());
+                        this.GROUPS.get(group.getID()).commandCount(newGroup.get_CommandList().length);
+                    }
+
+                    //Exec group
+                    group.run(this);
+                    //Update the group
+                    add_Group(group);
+                }
+                catch(Exception e) {
+                    //e.printStackTrace();
+                }
+            }
         }
 
     }

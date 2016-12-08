@@ -23,6 +23,7 @@ public class v3Command_Process {
     private TimeHandler time = new TimeHandler();
 
     private v3Command command;
+    private Thread pthread;
 
     public v3Command_Process(v3Command command, CallbackHandler group_callback) {
         log.setTracerTitle(v3Command_Process.class);
@@ -32,9 +33,20 @@ public class v3Command_Process {
 
         //Start new thread that uses an instance of this class
         //In the internal class ProcessThread
-        new Thread( new ProcessThread(this,group_callback) ).start();
+        pthread = new Thread( new ProcessThread(this,group_callback) );
+        pthread.start();
     }
 
+    public void kill() {
+        try {
+            log.warning("Killing process for: " + command.get_str("process_name"));
+            pthread.interrupt();
+        }
+        catch(Exception e) {
+            log.warning(e.getMessage());
+            //e.printStackTrace();
+        }
+    }
 
     /** Get command
      *

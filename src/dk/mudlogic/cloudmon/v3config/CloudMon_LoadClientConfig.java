@@ -90,6 +90,10 @@ public class CloudMon_LoadClientConfig {
         return CLIENTS.values().toArray(new v3Client[ CLIENTS.size() ] );
     }
 
+    public Hashtable<Integer,v3Client> getClients() {
+        return CLIENTS;
+    }
+
     public void rebuild() {
         CLIENTS = build_Clients();
     }
@@ -219,6 +223,7 @@ public class CloudMon_LoadClientConfig {
                 //Add commands to group
                 //group = add_Commands(group,rows);
                 group = cload.add_Commands(group);
+                group.commandCount( group.get_CommandList().length );
 
                 //log.trace("Loaded " + group.get_CommandList().length + " commands in " + group.getName());
 
@@ -240,7 +245,7 @@ public class CloudMon_LoadClientConfig {
     class RebuildThread implements Runnable {
 
         TimeHandler time = new TimeHandler();
-        final int reload_time = 60 * 1000;
+        final int reload_time = 10 * 1000;
 
         CloudMon_LoadClientConfig LCC;
 
@@ -252,10 +257,9 @@ public class CloudMon_LoadClientConfig {
         public void run() {
 
             while(true) {
+                sleep(reload_time);
 
                 LCC.rebuild();
-
-                sleep(reload_time);
             }
 
         }
